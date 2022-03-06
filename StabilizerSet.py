@@ -244,7 +244,7 @@ class StabilizerSet():
         np.add.at(left_endpoints, first_nonzero, 1)
 
         if pos is not None:
-            assert((pos > 0) and (pos < N))
+            assert((pos > 0) and (pos < self.N))
             return np.sum(left_endpoints[:pos]) - pos
         else:
             return np.sum(left_endpoints[:self.N//2]) - self.N//2
@@ -289,12 +289,10 @@ class StabilizerSet():
             print(self.coeff[i]*prefactor, out)
 
 
+M = 6
+S = StabilizerSet(M)
 
-
-N = 6
-S = StabilizerSet(N)
-
-#for i in range(N):
+#for i in range(M):
 #    S.set_string(i, "z", left_pad=i)
 
 S.set_string(0, "xeeeez")
