@@ -19,6 +19,6 @@ Contents:
    - define Pauli operators and simple relations as in the finite size case
    - Methods for time evolution and measurement, as above. They only need to act within the lightcone of the operator.
 
-3. Module: Wegner flow, symbolic manipulations, some of this is already written.
+3. Module: "LocalTerms.py". Description: for Schrieffer-Wolff, Wegner flow, RG, and other symbolic manipulations. Some of this is already written, it uses a modified version of the operator class imbued with the ability to handle symbolic coefficients as well.
 
-Future: Higher dimensions, entanglement, OTOCs, idk.
+Future: Higher spatial dimensions, entanglement, OTOCs, idk. Convert to other bases (the U(1) basis, e.g., p_up, p_down, s_plus, s_minus). Eventually may want to write QuDit ops?
