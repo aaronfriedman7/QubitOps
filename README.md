@@ -3,7 +3,7 @@ Manipulations using Pauli strings
 
 Contents:
 
-1. Module: "NQubitOps.py". Description: define operators acting on a system with a finite number of qubits (N). Operators are spanned by Pauli strings, which form the basis for all qubit operators. Module should include:
+1. Module: "NQubitOps.py". Description: define operators acting on a system with a finite and fixed number of qubits (N). Operators are spanned by Pauli strings, which form the basis for all qubit operators. Module should include:
 (a) define the Pauli string basis operators for fixed number of qubits
 (b) simple relations for Pauli string basis operators (rescale, multiply two strings, commute, and anticommute)
 (c) define Pauli operators, which are weighted superpositions of Pauli string operators
@@ -18,7 +18,6 @@ Contents:
 (c) define the same simple relations; however, multiplication will require extending the two Pauli strings to be the same length by padding with identities
 (d) define Pauli operators and simple relations as in the finite size case
 (e) Methods for time evolution and measurement, as above. They only need to act within the lightcone of the operator.
-
 
 3. Module: Wegner flow, symbolic manipulations, some of this is already written.
 
