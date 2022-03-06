@@ -1,0 +1,21 @@
+NQubitOps / PauliStr class:
+-Improve the from_char_str and print_string methods, if applicable? Way to use dictionaries or vectorization for anything?
+-"Save" function? Will want to save strings after clifford evolution maybe? Generally, only need to save operators
+-"to_ndarray" and/or "from_ndarray" function(s)? For the sizes we care about, probably not a good idea.
+-addX(site), addY(site), addZ(site) operations? Would only be used during interactive python sessions.
+
+NQubitOps / Operator class:
+-Aaron: copy over the basics
+-The empty operator and "include_string" functions...
+-QUESTION: build all "operator" objects as empty lists and then add in Pauli strings with different weights? or is there a better way?
+-Rescale
+-Addition/subtraction/multiplication both in place and static
+-static dot and [anti]commutator methods
+-Save and load methods
+-copy
+-to_strings (make a list of all the included pauli strings, mostly for internal use)
+-QUESTION: can we vectorize the multiplication of the Pauli strings in each operator?
+-operator norm?
+-checks: is_null, is_unitary, is_hermitian?
+-expontiation? create operator that's the exponential of a string (this one is easy)?
+-from/to ndarray??
