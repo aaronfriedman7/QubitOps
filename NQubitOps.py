@@ -10,22 +10,25 @@ Disclaimer: For internal / private use only; please do not share without my perm
 import timeit
 import numpy as np
 
-
 ####### Pauli String Object
-################################################################################################
-################################################################################################
+##############################################################################
+##############################################################################
 class PauliStr():
     """
-    Represents a single basis string operator of the form O[0] ... O[j] O[j+1] ... O[N-1]
-    The Pauli String is always a Kronecker product operator (over sites)
-    The operator O[j] acts on spin "j", and is one of the following operators: Id, Pauli_1 Pauli_2, Pauli_3 (or Id, X, Y, Z)
+    Represents a single basis string operator of the form
+    O[0] ... O[j] O[j+1] ... O[N-1]. The Pauli String is always a Kronecker
+    product operator (over sites).
+
+    The operator O[j] acts on spin "j", and is one of the following operators:
+
+        Id, Pauli_1 Pauli_2, Pauli_3 (or Id, X, Y, Z)
     
-    Each Pauli is represented by two bits
+    Each Pauli is represented by two bits:
 
-    00 = Id, 10 = X, 11 = XZ, 01 = Z 
+        00 = Id, 10 = X, 11 = XZ, 01 = Z 
 
-    Note: since 11 represents XZ = -iY, there is an associated phase, stored in the overall
-    coefficient for the Pauli string
+    Note: since 11 represents XZ = -iY, there is an associated phase, stored
+    in the overall coefficient for the Pauli string
     
     Attributes
     ----------
@@ -47,20 +50,24 @@ class PauliStr():
     
     def __init__(self, N=10, coeff=1+0j, Xint=None, Zint=None):
         """
-        Create Pauli string object from boolean arrays representing the X and Z operator content
+        Create Pauli string object from boolean arrays representing the X and
+        Z operator content
 
         Parameters
         ----------
         N : int, optional
-            An integer representing the number of sites upon which the Pauli string acts
+            An integer representing the number of sites upon which the Pauli
+            string acts
         coeff : complex, optional
             Overall coefficient multiplying the string. The default is 1.0.
         Xint : numpy array, dtype=bool, optional
-            Boolean array, giving the sites on which an "X" acts ("1" for an X), from which the string is constructed.
-            Default is all 0's (all identities).
+            Boolean array, giving the sites on which an "X" acts ("1" for an
+            X), from which the string is constructed. Default is all 0's (all
+            identities).
         Zint : numpy array, dtype=bool, optional
-            Boolean array, giving the sites on which an "Z" acts ("1" for an Z), from which the string is constructed.
-            Default is all 0's (all identities).
+            Boolean array, giving the sites on which an "Z" acts ("1" for an
+            Z), from which the string is constructed. Default is all 0's (all
+            identities).
         """
 
         self.N = N                          # length of Pauli string
@@ -79,14 +86,16 @@ class PauliStr():
     @classmethod
     def from_char_string(cls, charstr, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
         """
-        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean arrays. Other characters give identity.
+        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean
+        arrays. Other characters give identity.
 
         Parameters
         ----------
         cls : PauliString Object
             Create a single basis string
         charstr : string
-            String of characters: x,X,1 for (1); y,Y,2 for (2); z,Z,3 for (3); all others to Identity
+            String of characters: x,X,1 for (1); y,Y,2 for (2); z,Z,3 for (3);
+            all others to Identity
         coeff : complex, optional
             Overall coefficient (complex) for the string. The default is 1.0.
         left_pad : int, optional
@@ -133,15 +142,33 @@ class PauliStr():
         return cls(N, coeff, X_int, Z_int)
 
 
+    def rescale(self, scale):
+        """
+        Multiply a PauliString Object Instance IN PLACE by constant factor.
+        This affects only the "coeff" part of the string, not its operator
+        content.
+
+        Parameters
+        ----------
+        scale : complex float
+            rescaling factor by which the Pauli string is multiplied
+        """
+
+        self.coeff = scale * self.coeff
+
+
     def dot(self, PStr_B):
         """
-        Multiply a PauliString Object Instance IN PLACE from the right by PStr_B
-        A.dot(B) = A*B
+        Multiply a PauliString Object Instance IN PLACE from the right by
+        PStr_B, i.e.,
+
+            A.dot(B) = A*B
 
         Parameters
         ----------
         PStr_B : PauliString Object Instance
-            The Pauli string that is being multiplied (from the right onto our current string)
+            The Pauli string that is being multiplied (from the right onto our
+            current string)
 
         Returns
         -------
@@ -161,20 +188,21 @@ class PauliStr():
 
     def apply(self, PStr_B, loc=0):
         """
-        Multiply a PauliString Object Instance IN PLACE from the right by PStr_B
-        A.dot(B) = A*B
+        Multiply a PauliString Object Instance IN PLACE from the right by
+        PStr_B, i.e., A.dot(B) = A*B
 
-        The string PStr_B can have a length smaller than or equal to that of the present
-        instance. Open boundary conditions are assumed, so that PStr_B does not wrap around
-        the 
+        The string PStr_B can have a length smaller than or equal to that of
+        the present instance. Open boundary conditions are assumed, so that
+        PStr_B does not wrap around the boundary of the system.
 
         Parameters
         ----------
         PStr_B : PauliString Object Instance
-            The Pauli string that is being multiplied (from the right onto our current string)
+            The Pauli string that is being multiplied (from the right onto our
+            current string)
         loc : int, optional
-            Leftmost site at which the string PStr_B is to be applied, so that PStr_B spans the sites
-            [loc, ..., loc + PStr_B.size - 1]
+            Leftmost site at which the string PStr_B is to be applied, so that
+            PStr_B spans the sites [loc, ..., loc + PStr_B.size - 1]
         """
 
         assert(self.N >= PStr_B.N)
@@ -228,8 +256,10 @@ class PauliStr():
     @staticmethod
     def commutator(PStr_A, PStr_B, anti=False):
         """
-        Create a new PauliString Object Instance as the commutator (Default), [ A , B ], of two PauliStrings
-        OR the ANTI-commutator (anti==True), { A , B }, of two IntStrings
+        Create a new PauliString Object Instance as the commutator (Default),
+        [ A , B ], of two PauliStrings OR the ANTI-commutator (anti==True),
+        { A , B }, of two IntStrings.
+
         The ordering is unimportant if anti==True.
         NOTE: every Pauli string either commutes or anticommutes
 
@@ -301,8 +331,8 @@ class PauliStr():
         P_2 -> "y"
         P_3 -> "z"
 
-        The overall magnitude and phase of the string is printed along with its operator
-        content.
+        The overall magnitude and phase of the string is printed along with
+        its operator content.
         """
         out = ""
         prefactor = 1
