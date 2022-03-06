@@ -3,7 +3,7 @@
 """
 Created on Fri Oct  2 13:34:49 2020
 @author: Aaron + Ollie
-Disclaimer: For internal / private use only; please do not share without my permission.
+Disclaimer: For internal / private use only; please do not share without permission.
 """
 
 import numpy as np
