@@ -11,23 +11,28 @@ from sys import exit
 
 
 ####### Pauli String Object
-################################################################################################
-################################################################################################
+##############################################################################
+##############################################################################
 class PauliStr():
     """
-    Pauli `string' object: Represents a single basis string operator of the form O[0] ... O[j] O[j+1] ... O[N-1]
-    where the operator O[j] acts on spin "j", and is one of the following operators: Id, Pauli_1 Pauli_2, Pauli_3 (or Id, X, Y, Z)
+    Pauli `string' object: Represents a single basis string operator of the
+    form O[0] ... O[j] O[j+1] ... O[N-1], where the operator O[j] acts on spin
+    "j", and is one of the following operators: Id, Pauli_1 Pauli_2, Pauli_3
+    (or Id, X, Y, Z)
     
     The Pauli String is always a Kronecker product operator (over sites).
     
-    Pauli strings form an orthonormal basis for the 4**N unique operators acting on N qubits.
+    Pauli strings form an orthonormal basis for the 4**N unique operators
+    acting on N qubits.
     
-    Each Pauli operator, O[j], is represented by two bits, corresponding to X and Z:
+    Each Pauli operator, O[j], is represented by two bits, corresponding to X
+    and Z:
     
     Id = '00', X = '10', Z = '01', XZ = '11' = - 1j Y
     
-    In order to track Ys, we must account for an overall phase, stored in the string's coefficient;
-    By convention, X acts to the left of Z on a given site.
+    In order to track Ys, we must account for an overall phase, stored in the
+    string's coefficient; by convention, X acts to the left of Z on a given
+    site.
     
     Attributes
     ----------
@@ -53,19 +58,24 @@ class PauliStr():
     
     def __init__(self, N = 10, coeff = 1.0 + 0.0j, Xs = None, Zs = None):
         """
-        Create Pauli string object from boolean arrays representing the X and Z operator content
+        Create Pauli string object from boolean arrays representing the X and
+        Z operator content
+        
         Parameters
         ----------
         N : int, optional
-            An integer representing the number of sites upon which the Pauli string acts
+            An integer representing the number of sites upon which the Pauli
+            string acts
         coeff : complex, optional
             Overall coefficient multiplying the string. The default is 1.0.
         Xs : numpy array, dtype=bool, optional
-            Boolean array, giving the sites on which an "X" acts ("1" for an X), from which the string is constructed.
-            Default is all 0's (all identities).
+            Boolean array, giving the sites on which an "X" acts ("1" for an
+            X), from which the string is constructed. Default is all 0's
+            (all identities).
         Zs : numpy array, dtype=bool, optional
-            Boolean array, giving the sites on which an "Z" acts ("1" for an Z), from which the string is constructed.
-            Default is all 0's (all identities).
+            Boolean array, giving the sites on which an "Z" acts ("1" for an
+            Z), from which the string is constructed. Default is all 0's
+            (all identities).
         """
         
         # length of Pauli string / system
@@ -95,8 +105,9 @@ class PauliStr():
     @classmethod
     def from_char_string(cls, charstr, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
         """
-        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean arrays. Other characters give identity. 
-        Ignores characters in "ignored_chars"
+        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean
+        arrays. Other characters give identity. Ignores characters in
+        "ignored_chars"
         
         
         Parameters
@@ -104,7 +115,8 @@ class PauliStr():
         cls : PauliString Object
             Create a single basis string
         charstr : string
-            String of characters: x,X,1 for (1); y,Y,2 for (2); z,Z,3 for (3); all others to Identity
+            String of characters: x,X,1 for (1); y,Y,2 for (2); z,Z,3 for (3);
+            all others to Identity
         coeff : complex, optional
             Overall coefficient (complex) for the string. The default is 1.0.
         left_pad : int, optional
@@ -174,13 +186,14 @@ class PauliStr():
 
     def dot(self, PStr_B):
         """
-        Multiply a PauliString object instance IN PLACE from the RIGHT by PStr_B
-        A.dot(B) = A*B
+        Multiply a PauliString object instance IN PLACE from the RIGHT by
+        PStr_B, i.e., A.dot(B) = A*B
         
         Parameters
         ----------
         PStr_B : PauliStr object
-            The Pauli string that is being multiplied (from the right) onto the current string
+            The Pauli string that is being multiplied (from the right) onto
+            the current string
         """
 
         assert(self.N == PStr_B.N)
@@ -197,13 +210,14 @@ class PauliStr():
 
     def apply(self, PStr_B):
         """
-        Multiply a PauliString object instance IN PLACE from the LEFT by PStr_B
-        A.apply(B) = B*A
+        Multiply a PauliString object instance IN PLACE from the LEFT by
+        PStr_B, i.e., A.apply(B) = B*A
         
         Parameters
         ----------
         PStr_B : PauliStr object
-            The Pauli string that is being multiplied (from the left) onto the current string
+            The Pauli string that is being multiplied (from the left) onto the
+            current string
         """
 
         assert(self.N == PStr_B.N)
@@ -240,20 +254,20 @@ class PauliStr():
         P_1 -> "x"
         P_2 -> "y"
         P_3 -> "z"
-        The overall magnitude and phase of the string is printed along with its operator
-        content.
+        The overall magnitude and phase of the string is printed along with
+        its operator content.
         """
         out = ""
         prefactor = 1.0
 
-        for xs, zs in zip(self.X_int, self.Z_int):
+        for xs, zs in zip(self.X_arr, self.Z_arr):
             if (xs == 0):
                 if (zs == 0):
                     out += "e"
                 elif (zs == 1):
                     out += "z"
                 else:
-                    raise ValueError("Unexpected value in Z_int: {}, must be either 0 or 1".format(zs))
+                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
             elif (xs == 1):
                 if (zs == 0):
                     out += "x"
@@ -261,9 +275,9 @@ class PauliStr():
                     out += "y"
                     prefactor *= (-1j)
                 else:
-                    raise ValueError("Unexpected value in Z_int: {}, must be either 0 or 1".format(zs))
+                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
             else:
-                raise ValueError("Unexpected value in X_int: {}, must be either 0 or 1".format(xs))
+                raise ValueError("Unexpected value in X_arr: {}, must be either 0 or 1".format(xs))
 
         print("Pauli string: ", self.coeff*prefactor, out)
     
@@ -275,7 +289,8 @@ class PauliStr():
         Returns
         -------
         PauliStr object
-            A new instance of the PauliStr class object with identical attributes as "self" 
+            A new instance of the PauliStr class object with identical
+            attributes as "self" 
 
         """
         return PauliStr(self.N, self.coeff, self.X_arr, self.Z_arr)
@@ -387,7 +402,8 @@ class PauliStr():
         Returns
         -------
         output : PauliStr object
-            The PaluiStr object C = [A,B] (commutator) or C = {A,B} (anticommutator)
+            The PaluiStr object C = [A,B] (commutator) or
+            C = {A,B} (anticommutator)
         
         OR
         
@@ -422,7 +438,3 @@ class PauliStr():
             
         
         return PauliStr(PStr_A.N, new_coeff, new_X_arr, new_Z_arr)
-
-
-
-
