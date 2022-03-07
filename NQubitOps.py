@@ -132,7 +132,7 @@ class PauliStr():
         """
         
         for s in PauliStr.ignored_chars:
-            charstr.replace(s, "")
+            charstr = charstr.replace(s, "")
         
         N = len(charstr) + left_pad + right_pad
 
@@ -196,9 +196,11 @@ class PauliStr():
         """
         
         for s in PauliStr.ignored_chars:
-            xz_str.replace(s, "")
+            xz_str = xz_str.replace(s, "")
         
-        N = len(charstr) + left_pad + right_pad
+
+        assert((len(xz_str) % 2) == 0)
+        N = len(charstr)//2 + left_pad + right_pad
 
         l_arr = np.zeros(left_pad, dtype='bool')
         r_arr = np.zeros(right_pad, dtype='bool')
