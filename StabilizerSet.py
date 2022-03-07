@@ -9,6 +9,8 @@ Disclaimer: For internal / private use only; please do not share without my perm
 """
 import numpy as np
 import sympy
+import random
+import NQubitOps as NQO
 
 ####### Stabilizer Set Object
 ##############################################################################
@@ -52,7 +54,7 @@ class StabilizerSet():
     P1_array = np.array([[0, 1],  [1, 0]])
     P2_array = np.array([[0, -1j],[1j, 0]])
     P3_array = np.array([[1, 0],  [0, -1]])
-    
+
     def __init__(self, N=10, coeff=None, Xs=None, Zs=None):
         """
         Create Stabilizer object from boolean arrays representing the X and
@@ -272,6 +274,46 @@ class StabilizerSet():
             return np.sum(left_endpoints[:pos]) - pos
         else:
             return np.sum(left_endpoints[:self.N//2]) - self.N//2
+
+
+    def random_Z_gate(self, pos):
+        r"""
+        Apply gate of the form U exp(i h Z) to the state of the system.
+
+        At the level of the stabilizers, this leads to a transformation 
+
+            S -> U^dagger S U
+
+        This leads to the following possiblilties:
+
+            X -> \pm X
+        or  X -> \pm XZ
+        
+        therefore (01) -> (01) always
+        while     (10) -> (10) or (11) with a potential sign change    
+        """
+
+        rand = random.randint(0, 3) # random integer from {0, 1, 2, 3}
+
+        Z_dict = {}
+        Z_dict[(0, 0)] = [NQO.PauliStr.from_char_string('e', coeff=1),   NQO.PauliStr.from_char_string('e', coeff=1),
+                          NQO.PauliStr.from_char_string('e', coeff=1),   NQO.PauliStr.from_char_string('e', coeff=1)]
+        Z_dict[(1, 0)] = [NQO.PauliStr.from_char_string('x', coeff=1),   NQO.PauliStr.from_char_string('x', coeff=-1),
+                          NQO.PauliStr.from_char_string('y', coeff=-1j), NQO.PauliStr.from_char_string('y', coeff=1j)]
+        Z_dict[(0, 1)] = [NQO.PauliStr.from_char_string('z', coeff=1),   NQO.PauliStr.from_char_string('z', coeff=1),
+                          NQO.PauliStr.from_char_string('z', coeff=1),   NQO.PauliStr.from_char_string('z', coeff=1)]
+        Z_dict[(1, 1)] = [NQO.PauliStr.from_char_string('y', coeff=-1j), NQO.PauliStr.from_char_string('y', coeff=1j),
+                          NQO.PauliStr.from_char_string('x', coeff=1),   NQO.PauliStr.from_char_string('x', coeff=-1)]
+
+        new_strings = [Z_dict[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
+
+        signs = np.array([new_strings[n].coeff for n in range(self.N)])
+        new_X = np.array([new_strings[n].X_arr[0] for n in range(self.N)])
+        new_Z = np.array([new_strings[n].Z_arr[0] for n in range(self.N)])
+
+        self.X_arr[:, pos] = new_X
+        self.Z_arr[:, pos] = new_Z
+        self.coeff *= signs
 
 
     def print_stabilizers(self):

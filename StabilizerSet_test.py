@@ -8,6 +8,9 @@ Created on Fri Oct  2 13:34:49 2020
 import timeit
 import StabilizerSet as StSet
 
+
+
+
 M = 6
 S = StSet.StabilizerSet(M)
 
@@ -24,3 +27,12 @@ S.set_string(5, "eezxee")
 S.print_stabilizers()
 
 print(S.entanglement_entropy())
+
+
+
+
+
+
+
+S.random_Z_gate(0)
+S.print_stabilizers()
