@@ -165,6 +165,73 @@ class PauliStr():
 
         return cls(N, coeff, X_int, Z_int)
     
+        ### Alternate instantiation:
+    @classmethod
+    def from_XZ_string(cls, xz_str, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
+        """
+        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean
+        arrays. Other characters give identity. Ignores characters in
+        "ignored_chars"
+        
+        
+        Parameters
+        ----------
+        cls : PauliString Object
+            Create a single basis string
+        xz_str : string
+            String of characters: even elements correspond to elements of
+            X_arr, odd elements correspond to elements of Z_arr. For example,
+            '0110' becomes Z X on adjacent sites. Length of string is twice
+            number of sites.
+        coeff : complex, optional
+            Overall coefficient (complex) for the string. The default is 1.0.
+        left_pad : int, optional
+            Number of identities to pad to the LEFT of the character string
+        right_pad : int, optional
+            Number of identities to pad to the RIGHT of the character string
+            
+            
+        Returns
+        -------
+        PauliString Class Object
+            With the operator content stored as an integer
+        """
+        
+        for s in PauliStr.ignored_chars:
+            xz_str.replace(s, "")
+        
+        N = len(charstr) + left_pad + right_pad
+
+        l_arr = np.zeros(left_pad, dtype='bool')
+        r_arr = np.zeros(right_pad, dtype='bool')
+
+        x_arr = []
+        z_arr = []
+
+        for char in xz_str[::2]:
+            if char == "1":
+                x_arr.append(1)
+            elif char == "0":
+                x_arr.append(0)
+            else:
+                raise ValueError("Encountered invalid character {} in string".format(char))
+
+        for char in xz_str[1::2]:
+            if char == "1":
+                z_arr.append(1)
+            elif char == "0":
+                z_arr.append(0)
+            else:
+                raise ValueError("Encountered invalid character {} in string".format(char))
+
+
+        x_arr = np.array(x_arr, dtype='bool')
+        z_arr = np.array(z_arr, dtype='bool')
+
+        X_int = np.r_[l_arr, x_arr, r_arr]
+        Z_int = np.r_[l_arr, z_arr, r_arr]
+
+        return cls(N, coeff, X_int, Z_int)
     
     @classmethod
     def null_str(cls, N):
