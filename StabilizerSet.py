@@ -156,7 +156,7 @@ class StabilizerSet():
 
             A.dot(B) = A*B
 
-        for all strings belonging to the set
+        for *all* strings belonging to the set
 
         Parameters
         ----------
@@ -171,6 +171,31 @@ class StabilizerSet():
         self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr[np.newaxis, :])
 
         sign_arr = np.logical_and(self.Z_arr, PStr_B.X_arr[np.newaxis, :])
+        self.coeff = self.coeff * PStr_B.coeff * (-1)**(np.sum(sign_arr, axis=1) % 2)
+
+
+    def apply(self, PStr_B):
+        """
+        Multiply a StabilizerSet Instance IN PLACE from the LEFT by PStr_B,
+        i.e.,
+
+            A.apply(B) = B*A
+
+        for *all* strings belonging to the set
+
+        Parameters
+        ----------
+        PStr_B : PauliString Object Instance
+            The Pauli string that is being multiplied (from the left onto our
+            current string)
+        """
+
+        assert(self.N == SetB.N)
+
+        self.X_arr = np.logical_xor(PStr_B.X_arr[np.newaxis, :], self.X_arr)
+        self.Z_arr = np.logical_xor(PStr_B.Z_arr[np.newaxis, :], self.Z_arr)
+
+        sign_arr = np.logical_and(PStr_B.Z_arr[np.newaxis, :], self.X_arr)
         self.coeff = self.coeff * PStr_B.coeff * (-1)**(np.sum(sign_arr, axis=1) % 2)
 
 
