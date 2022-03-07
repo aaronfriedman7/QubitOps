@@ -40,10 +40,10 @@ class StabilizerSet():
     coeff : complex numpy array
         an array of complex numbers, corresponding to the coefficient
         multiplying the operator string
-    X_int : 2D numpy array, dtype=bool
+    X_arr : 2D numpy array, dtype=bool
         a boolean array, giving the sites on which an "X" acts ("1" for an X).
         First index specifies the string, second index specifies the site.
-    Z_int : 2D numpy array, dtype=bool
+    Z_arr : 2D numpy array, dtype=bool
         a boolean array, giving the sites on which an "Z" acts ("1" for a Z).
         First index specifies the string, second index specifies the site.
     """
@@ -53,7 +53,7 @@ class StabilizerSet():
     P2_array = np.array([[0, -1j],[1j, 0]])
     P3_array = np.array([[1, 0],  [0, -1]])
     
-    def __init__(self, N=10, coeff=None, Xint=None, Zint=None):
+    def __init__(self, N=10, coeff=None, Xs=None, Zs=None):
         """
         Create Stabilizer object from boolean arrays representing the X and
         Z operator content in each string
@@ -65,11 +65,11 @@ class StabilizerSet():
             string acts. Also equals the number of stabilizers.
         coeff : complex numpy array, optional
             Overall coefficient multiplying the string. The default is 1.0.
-        Xint : 2D numpy array, dtype=bool, optional
+        Xs : 2D numpy array, dtype=bool, optional
             Boolean array, giving the sites on which an "X" acts ("1" for an
             X), from which the string is constructed. Default is all 0's (all
             identities).
-        Zint : 2D numpy array, dtype=bool, optional
+        Zs : 2D numpy array, dtype=bool, optional
             Boolean array, giving the sites on which an "Z" acts ("1" for an
             Z), from which the string is constructed. Default is all 0's (all
             identities).
@@ -77,12 +77,12 @@ class StabilizerSet():
 
         self.N = N                              # length of Pauli string
 
-        if (Xint is not None) and (Zint is not None):
-            self.X_int = Xint
-            self.Z_int = Zint
+        if (Xs is not None) and (Zs is not None):
+            self.X_arr = Xs
+            self.Z_arr = Zs
         else:
-            self.X_int = np.zeros((N, N), dtype='bool')
-            self.Z_int = np.zeros((N, N), dtype='bool')
+            self.X_arr = np.zeros((N, N), dtype='bool')
+            self.Z_arr = np.zeros((N, N), dtype='bool')
 
         if coeff is not None:
             self.coeff = coeff                  # overall magnitude & phase
@@ -145,8 +145,8 @@ class StabilizerSet():
         X_int = np.r_[l_arr, x_arr, r_arr]
         Z_int = np.r_[l_arr, z_arr, r_arr]
 
-        self.X_int[index, :] = X_int
-        self.Z_int[index, :] = Z_int
+        self.X_arr[index, :] = X_int
+        self.Z_arr[index, :] = Z_int
 
 
     def dot(self, PStr_B):
@@ -167,10 +167,10 @@ class StabilizerSet():
 
         assert(self.N == SetB.N)
 
-        self.X_int = np.logical_xor(self.X_int, PStr_B.X_int[np.newaxis, :])
-        self.Z_int = np.logical_xor(self.Z_int, PStr_B.Z_int[np.newaxis, :])
+        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr[np.newaxis, :])
+        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr[np.newaxis, :])
 
-        sign_arr = np.logical_and(self.Z_int, PStr_B.X_int[np.newaxis, :])
+        sign_arr = np.logical_and(self.Z_arr, PStr_B.X_arr[np.newaxis, :])
         self.coeff = self.coeff * PStr_B.coeff * (-1)**(np.sum(sign_arr, axis=1) % 2)
 
 
@@ -190,10 +190,10 @@ class StabilizerSet():
 
         assert(self.N == SetB.N)
 
-        self.X_int[index, :] = np.logical_xor(self.X_int[index, :], PStr_B.X_int)
-        self.Z_int[index, :] = np.logical_xor(self.Z_int[index, :], PStr_B.Z_int)
+        self.X_arr[index, :] = np.logical_xor(self.X_arr[index, :], PStr_B.X_arr)
+        self.Z_arr[index, :] = np.logical_xor(self.Z_arr[index, :], PStr_B.Z_arr)
 
-        sign_arr = np.logical_and(self.Z_int[index, :], PStr_B.X_int)
+        sign_arr = np.logical_and(self.Z_arr[index, :], PStr_B.X_arr)
         self.coeff[index] = self.coeff[index] * PStr_B.coeff * (-1)**(np.sum(sign_arr) % 2)
 
 
@@ -223,8 +223,8 @@ class StabilizerSet():
 
         # Put all X's and Z's into one array, with X's preceding Z's
         full_bitarr = np.zeros((self.N, 2*self.N), dtype='int')
-        full_bitarr[:, ::2] = self.X_int
-        full_bitarr[:, 1::2] = self.Z_int
+        full_bitarr[:, ::2] = self.X_arr
+        full_bitarr[:, 1::2] = self.Z_arr
 
         # perform Gaussian elimination to row echelon form (not sure about
         #   speed of this function)
@@ -266,14 +266,14 @@ class StabilizerSet():
             out = ""
             prefactor = 1
 
-            for xs, zs in zip(self.X_int[i, :], self.Z_int[i, :]):
+            for xs, zs in zip(self.X_arr[i, :], self.Z_arr[i, :]):
                 if (xs == 0):
                     if (zs == 0):
                         out += "e"
                     elif (zs == 1):
                         out += "z"
                     else:
-                        raise ValueError("Unexpected value in Z_int: {}, must be either 0 or 1".format(zs))
+                        raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
                 elif (xs == 1):
                     if (zs == 0):
                         out += "x"
@@ -281,9 +281,9 @@ class StabilizerSet():
                         out += "y"
                         prefactor *= (-1j)
                     else:
-                        raise ValueError("Unexpected value in Z_int: {}, must be either 0 or 1".format(zs))
+                        raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
                 else:
-                    raise ValueError("Unexpected value in X_int: {}, must be either 0 or 1".format(xs))
+                    raise ValueError("Unexpected value in X_arr: {}, must be either 0 or 1".format(xs))
 
             print(self.coeff[i]*prefactor, out)
 
