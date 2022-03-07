@@ -169,9 +169,7 @@ class PauliStr():
     @classmethod
     def from_XZ_string(cls, xz_str, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
         """
-        Convert a string of characters 1,x,X ; 2,y,Y ; 3,z,Z to boolean
-        arrays. Other characters give identity. Ignores characters in
-        "ignored_chars"
+        Convert a string of characters 0, 1 to boolean arrays. 
         
         
         Parameters
