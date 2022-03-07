@@ -184,6 +184,30 @@ class PauliStr():
         """
         return cls(N, 0.0)
 
+    @classmethod
+    def Id(cls, coeff=1):
+        """ Single site identity """
+        return cls(1, coeff, np.array([0]), np.array([0]))
+
+
+    @classmethod
+    def XI(cls, coeff=1):
+        """ Single site X operator """
+        return cls(1, coeff, np.array([1]), np.array([0]))
+
+
+    @classmethod
+    def IZ(cls, coeff=1):
+        """ Single site Z operator """
+        return cls(1, coeff, np.array([0]), np.array([1]))
+
+
+    @classmethod
+    def XZ(cls, coeff=1):
+        """ Single site XZ operator (note: differs from Y by a phase) """
+        return cls(1, coeff, np.array([1]), np.array([1]))
+
+
     def dot(self, PStr_B):
         """
         Multiply a PauliString object instance IN PLACE from the RIGHT by

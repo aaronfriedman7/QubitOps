@@ -278,7 +278,7 @@ class StabilizerSet():
 
     def random_Z_gate(self, pos):
         r"""
-        Apply gate of the form U exp(i h Z) to the state of the system.
+        Apply gate of the form U = exp(i h Z) to the state of the system.
 
         At the level of the stabilizers, this leads to a transformation 
 
@@ -296,14 +296,14 @@ class StabilizerSet():
         rand = random.randint(0, 3) # random integer from {0, 1, 2, 3}
 
         Z_dict = {}
-        Z_dict[(0, 0)] = [NQO.PauliStr.from_char_string('e', coeff=1),   NQO.PauliStr.from_char_string('e', coeff=1),
-                          NQO.PauliStr.from_char_string('e', coeff=1),   NQO.PauliStr.from_char_string('e', coeff=1)]
-        Z_dict[(1, 0)] = [NQO.PauliStr.from_char_string('x', coeff=1),   NQO.PauliStr.from_char_string('x', coeff=-1),
-                          NQO.PauliStr.from_char_string('y', coeff=-1j), NQO.PauliStr.from_char_string('y', coeff=1j)]
-        Z_dict[(0, 1)] = [NQO.PauliStr.from_char_string('z', coeff=1),   NQO.PauliStr.from_char_string('z', coeff=1),
-                          NQO.PauliStr.from_char_string('z', coeff=1),   NQO.PauliStr.from_char_string('z', coeff=1)]
-        Z_dict[(1, 1)] = [NQO.PauliStr.from_char_string('y', coeff=-1j), NQO.PauliStr.from_char_string('y', coeff=1j),
-                          NQO.PauliStr.from_char_string('x', coeff=1),   NQO.PauliStr.from_char_string('x', coeff=-1)]
+        Z_dict[(0, 0)] = [NQO.PauliStr.Id(coeff=+1),   NQO.PauliStr.Id(coeff=1),
+                          NQO.PauliStr.Id(coeff=+1),   NQO.PauliStr.Id(coeff=1)]
+        Z_dict[(1, 0)] = [NQO.PauliStr.XI(coeff=+1),   NQO.PauliStr.XI(coeff=-1),
+                          NQO.PauliStr.XZ(coeff=+1),   NQO.PauliStr.XZ(coeff=-1)]
+        Z_dict[(0, 1)] = [NQO.PauliStr.IZ(coeff=+1),   NQO.PauliStr.IZ(coeff=1),
+                          NQO.PauliStr.IZ(coeff=+1),   NQO.PauliStr.IZ(coeff=1)]
+        Z_dict[(1, 1)] = [NQO.PauliStr.XZ(coeff=+1),   NQO.PauliStr.XZ(coeff=-1),
+                          NQO.PauliStr.XI(coeff=+1),   NQO.PauliStr.XI(coeff=-1)]
 
         new_strings = [Z_dict[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
 
