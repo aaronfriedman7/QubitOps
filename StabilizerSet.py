@@ -7,7 +7,6 @@ Created on Fri Oct  2 13:34:49 2020
 
 Disclaimer: For internal / private use only; please do not share without my permission.
 """
-import timeit
 import numpy as np
 import sympy
 
@@ -115,9 +114,9 @@ class StabilizerSet():
         """
 
         assert(left_pad >= 0)
-        assert(len(charstr) + left_pad <= N)
+        assert(len(charstr) + left_pad <= self.N)
 
-        right_pad = N - len(charstr) - left_pad # (right_pad >= 0)
+        right_pad = self.N - len(charstr) - left_pad # (right_pad >= 0)
 
         l_arr = np.zeros(left_pad, dtype='bool')
         r_arr = np.zeros(right_pad, dtype='bool')
@@ -288,20 +287,3 @@ class StabilizerSet():
 
             print(self.coeff[i]*prefactor, out)
 
-
-M = 6
-S = StabilizerSet(M)
-
-#for i in range(M):
-#    S.set_string(i, "z", left_pad=i)
-
-S.set_string(0, "xeeeez")
-S.set_string(1, "zeeeex")
-S.set_string(2, "exeeze")
-S.set_string(3, "ezeexe")
-S.set_string(4, "eexzee")
-S.set_string(5, "eezxee")
-
-S.print_stabilizers()
-
-print(S.entanglement_entropy())
