@@ -7,7 +7,7 @@ Disclaimer: For internal / private use only; please do not share without permiss
 """
 
 import numpy as np
-from sys import exit
+
 
 
 ####### Pauli String Object
@@ -85,7 +85,7 @@ class PauliStr():
         if Xs is None:
             self.X_arr = np.zeros(N, dtype='bool')
         elif len(Xs) != N:
-            exit("mismatch between X array and number of qubits, N")
+            raise ValueError("Mismatch between N={} and length of X array = {}".format(N,len(Xs)))
         else:
             self.X_arr = Xs
         
@@ -93,7 +93,7 @@ class PauliStr():
         if Zs is None:
             self.Z_arr = np.zeros(N, dtype='bool')
         elif len(Zs) != N:
-            exit("mismatch between Z array and number of qubits, N")
+            raise ValueError("Mismatch between N={} and length of Z array = {}".format(N,len(Zs)))
         else:
             self.Z_arr = Zs
         
@@ -252,27 +252,43 @@ class PauliStr():
         return cls(N, 0.0)
 
     @classmethod
-    def Id(cls, coeff=1):
-        """ Single site identity """
-        return cls(1, coeff, np.array([0]), np.array([0]))
+    def Ident(cls, N=10, coeff=1.0+0.0j):
+        """
+        Creates an identity operator on N sites
 
+        Parameters
+        ----------
+        N : int, optional
+            Number of qubits in the chain. The default is 10.
+        coeff : complex, optional
+            Coefficient multiplying the identity. The default is 1.
+
+        Returns
+        -------
+        PauliStr object
+            A PauliString that acts as the identity on N sites, with some coefficient.
+
+        """
+        return cls(N,coeff,np.zeros(N, dtype='bool'),np.zeros(N, dtype='bool'))
+    
 
     @classmethod
-    def XI(cls, coeff=1):
-        """ Single site X operator """
+    def Xop(cls, coeff=1.0+0.0j):
+        """ Single site X operator, multiplied by coeff """
         return cls(1, coeff, np.array([1]), np.array([0]))
 
 
     @classmethod
-    def IZ(cls, coeff=1):
-        """ Single site Z operator """
+    def Zop(cls, coeff=1.0+0.0j):
+        """ Single site Z operator, multiplied by coeff """
         return cls(1, coeff, np.array([0]), np.array([1]))
 
 
     @classmethod
-    def XZ(cls, coeff=1):
-        """ Single site XZ operator (note: differs from Y by a phase) """
-        return cls(1, coeff, np.array([1]), np.array([1]))
+    def Yop(cls, coeff=1.0+0.0j):
+        """ Single site Y operator, multiplied by coeff"""
+        return cls(1, -1.0j*coeff, np.array([1]), np.array([1]))
+
 
 
     def dot(self, PStr_B):
@@ -337,6 +353,8 @@ class PauliStr():
 
         self.coeff *= scale
 
+
+### We might want to improve the print string function
 
     def print_string(self):
         """
@@ -423,6 +441,23 @@ class PauliStr():
 
     @staticmethod
     def check_comm(PStr_A, PStr_B):
+        """
+        Checks if the two Pauli strings commute. Returns True if [A,B] == 0 and False if [A,B] != 0.
+        If two Pauli strings don't commute, they must anticommute.
+
+        Parameters
+        ----------
+        PStr_A : PauliStr object
+            The left (first) Pauli string in the commutator
+        PStr_B : PauliStr object
+            The right (second) Pauli string in the commutator
+
+        Returns
+        -------
+        bool
+            True if [A,B] == 0, False otherwise.
+
+        """
         
         assert(PStr_A.N == PStr_B.N)
         
@@ -436,7 +471,24 @@ class PauliStr():
     
     @staticmethod
     def check_anticomm(PStr_A, PStr_B):
-        
+        """
+        Checks if the two Pauli strings ANTIcommute. Returns True if {A,B} == 0 and False if {A,B} != 0.
+        The ordering of A and B is unimportant, {A,B} = AB + BA.
+        If two Pauli strings don't anticommute, they must anticommute.
+
+        Parameters
+        ----------
+        PStr_A : PauliStr object
+            One of the Pauli strings in the anticommutator
+        PStr_B : PauliStr object
+            The other Pauli string in the anticommutator
+
+        Returns
+        -------
+        bool
+            True if {A,B} == 0, False otherwise.
+
+        """
         assert(PStr_A.N == PStr_B.N)
         
         sign1 = bool(np.sum(np.logical_and(PStr_A.X_arr, PStr_B.Z_arr)) % 2)
@@ -450,6 +502,25 @@ class PauliStr():
     
     @staticmethod
     def commutator(PStr_A, PStr_B):
+        """
+        The commutator [A,B] = AB - BA. 
+        If A and B commute (AB == BA), returns the null Pauli string (the zero operator).
+        Otherwise, a nonzero commutator is returned as a Pauli string.
+        The commutator of any two Pauli strings is either zero or another Pauli string.
+
+        Parameters
+        ----------
+        PStr_A : PauliStr object
+            One of the Pauli strings in the anticommutator
+        PStr_B : PauliStr object
+            The other Pauli string in the anticommutator
+
+        Returns
+        -------
+        PauliStr object
+            The anticommutator {A,B} as a Pauli string object.
+
+        """
         assert(PStr_A.N == PStr_B.N)
         
         if not PauliStr.check_comm(PStr_A, PStr_B):
@@ -460,6 +531,25 @@ class PauliStr():
         
     @staticmethod
     def anticommutator(PStr_A, PStr_B):
+        """
+        The ANTIcommutator {A,B} = AB + BA. The order of A and B does not matter.
+        If A and B anticommute (AB == - BA), returns the null Pauli string (the zero operator).
+        Otherwise, a nonzero anticommutator is returned as a Pauli string.
+        The anticommutator of any two Pauli strings is either zero or another Pauli string.
+
+        Parameters
+        ----------
+        PStr_A : PauliStr object
+            The left (first) Pauli string in the commutator
+        PStr_B : PauliStr object
+            The right (second) Pauli string in the commutator
+
+        Returns
+        -------
+        PauliStr object
+            The commutator [A,B] as a Pauli string object.
+
+        """
         assert(PStr_A.N == PStr_B.N)
         
         if not PauliStr.check_anticomm(PStr_A, PStr_B):
@@ -529,3 +619,29 @@ class PauliStr():
             
         
         return PauliStr(PStr_A.N, new_coeff, new_X_arr, new_Z_arr)
+    
+
+
+
+
+
+
+
+####### Pauli String Object
+##############################################################################
+##############################################################################
+class Operator():
+    
+    def __init__(self, N=10):
+        self.N = N
+        self.Strings = []
+    
+    ### current idea is simply store a list of Pauli strings, always check if a Pauli string is already in the list...order the list? idk.
+
+
+
+
+
+
+
+
