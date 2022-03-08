@@ -56,26 +56,37 @@ class StabilizerSet():
     P3_array = np.array([[1, 0],  [0, -1]])
 
 
+    Z_dict = {}
+    Z_dict[(0, 0)] = [NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1),
+                      NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1)]
+    Z_dict[(1, 0)] = [NQO.PauliStr.XI(coeff=+1) , NQO.PauliStr.XI(coeff=-1),
+                      NQO.PauliStr.XZ(coeff=+1j), NQO.PauliStr.XZ(coeff=-1j)]
+    Z_dict[(0, 1)] = [NQO.PauliStr.IZ(coeff=+1) , NQO.PauliStr.IZ(coeff=1),
+                      NQO.PauliStr.IZ(coeff=+1) , NQO.PauliStr.IZ(coeff=1)]
+    Z_dict[(1, 1)] = [NQO.PauliStr.XZ(coeff=+1) , NQO.PauliStr.XZ(coeff=-1),
+                      NQO.PauliStr.XI(coeff=+1j), NQO.PauliStr.XI(coeff=-1j)]
+
+
     XX_dict = {}
-    XX_dict[(0, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('00;00', 1),   NQO.PauliStr.from_XZ_string('00;00', +1), NQO.PauliStr.from_XZ_string('00;00', +1), NQO.PauliStr.from_XZ_string('00;00', +1)]
-    XX_dict[(1, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('10;00', 1),   NQO.PauliStr.from_XZ_string('10;00', +1), NQO.PauliStr.from_XZ_string('10;00', +1), NQO.PauliStr.from_XZ_string('10;00', +1)]
-    XX_dict[(0, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('01;00', 1),   NQO.PauliStr.from_XZ_string('01;00', -1), NQO.PauliStr.from_XZ_string('11;10', -1), NQO.PauliStr.from_XZ_string('11;10', +1)]
-    XX_dict[(1, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('11;00', 1),   NQO.PauliStr.from_XZ_string('11;00', -1), NQO.PauliStr.from_XZ_string('01;10', -1), NQO.PauliStr.from_XZ_string('01;10', +1)]
+    XX_dict[(0, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('00;00', 1),   NQO.PauliStr.from_XZ_string('00;00', +1), NQO.PauliStr.from_XZ_string('00;00', +1) , NQO.PauliStr.from_XZ_string('00;00', +1)]
+    XX_dict[(1, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('10;00', 1),   NQO.PauliStr.from_XZ_string('10;00', +1), NQO.PauliStr.from_XZ_string('10;00', +1) , NQO.PauliStr.from_XZ_string('10;00', +1)]
+    XX_dict[(0, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('01;00', 1),   NQO.PauliStr.from_XZ_string('01;00', -1), NQO.PauliStr.from_XZ_string('11;10', -1j), NQO.PauliStr.from_XZ_string('11;10', +1j)]
+    XX_dict[(1, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('11;00', 1),   NQO.PauliStr.from_XZ_string('11;00', -1), NQO.PauliStr.from_XZ_string('01;10', -1j), NQO.PauliStr.from_XZ_string('01;10', +1j)]
 
-    XX_dict[(0, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('00;10', 1),   NQO.PauliStr.from_XZ_string('00;10', +1), NQO.PauliStr.from_XZ_string('00;10', +1), NQO.PauliStr.from_XZ_string('00;10', +1)]
-    XX_dict[(1, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('10;10', 1),   NQO.PauliStr.from_XZ_string('10;10', +1), NQO.PauliStr.from_XZ_string('10;10', +1), NQO.PauliStr.from_XZ_string('10;10', +1)]
-    XX_dict[(0, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('01;10', 1),   NQO.PauliStr.from_XZ_string('01;10', -1), NQO.PauliStr.from_XZ_string('11;00', -1), NQO.PauliStr.from_XZ_string('11;00', +1)]
-    XX_dict[(1, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('11;10', 1),   NQO.PauliStr.from_XZ_string('11;10', -1), NQO.PauliStr.from_XZ_string('01;00', -1), NQO.PauliStr.from_XZ_string('01;00', +1)]
+    XX_dict[(0, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('00;10', 1),   NQO.PauliStr.from_XZ_string('00;10', +1), NQO.PauliStr.from_XZ_string('00;10', +1) , NQO.PauliStr.from_XZ_string('00;10', +1)]
+    XX_dict[(1, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('10;10', 1),   NQO.PauliStr.from_XZ_string('10;10', +1), NQO.PauliStr.from_XZ_string('10;10', +1) , NQO.PauliStr.from_XZ_string('10;10', +1)]
+    XX_dict[(0, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('01;10', 1),   NQO.PauliStr.from_XZ_string('01;10', -1), NQO.PauliStr.from_XZ_string('11;00', -1j), NQO.PauliStr.from_XZ_string('11;00', +1j)]
+    XX_dict[(1, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('11;10', 1),   NQO.PauliStr.from_XZ_string('11;10', -1), NQO.PauliStr.from_XZ_string('01;00', -1j), NQO.PauliStr.from_XZ_string('01;00', +1j)]
 
-    XX_dict[(0, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('00;01', 1),   NQO.PauliStr.from_XZ_string('00;01', -1), NQO.PauliStr.from_XZ_string('10;11', -1), NQO.PauliStr.from_XZ_string('10;11', +1)]
-    XX_dict[(1, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('10;01', 1),   NQO.PauliStr.from_XZ_string('10;01', -1), NQO.PauliStr.from_XZ_string('00;11', -1), NQO.PauliStr.from_XZ_string('00;11', +1)]
-    XX_dict[(0, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('01;01', 1),   NQO.PauliStr.from_XZ_string('01;01', +1), NQO.PauliStr.from_XZ_string('01;01', -1), NQO.PauliStr.from_XZ_string('01;01', -1)]
-    XX_dict[(1, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('11;01', 1),   NQO.PauliStr.from_XZ_string('11;01', +1), NQO.PauliStr.from_XZ_string('11;01', -1), NQO.PauliStr.from_XZ_string('11;01', -1)]
+    XX_dict[(0, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('00;01', 1),   NQO.PauliStr.from_XZ_string('00;01', -1), NQO.PauliStr.from_XZ_string('10;11', -1j), NQO.PauliStr.from_XZ_string('10;11', +1j)]
+    XX_dict[(1, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('10;01', 1),   NQO.PauliStr.from_XZ_string('10;01', -1), NQO.PauliStr.from_XZ_string('00;11', -1j), NQO.PauliStr.from_XZ_string('00;11', +1j)]
+    XX_dict[(0, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('01;01', 1),   NQO.PauliStr.from_XZ_string('01;01', +1), NQO.PauliStr.from_XZ_string('01;01', +1) , NQO.PauliStr.from_XZ_string('01;01', +1)]
+    XX_dict[(1, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('11;01', 1),   NQO.PauliStr.from_XZ_string('11;01', +1), NQO.PauliStr.from_XZ_string('11;01', +1) , NQO.PauliStr.from_XZ_string('11;01', +1)]
 
-    XX_dict[(0, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('00;11', 1),   NQO.PauliStr.from_XZ_string('00;11', -1), NQO.PauliStr.from_XZ_string('10;01', -1), NQO.PauliStr.from_XZ_string('10;01', +1)]
-    XX_dict[(1, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('10;11', 1),   NQO.PauliStr.from_XZ_string('10;11', -1), NQO.PauliStr.from_XZ_string('00;01', -1), NQO.PauliStr.from_XZ_string('00;01', +1)]
-    XX_dict[(0, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('01;11', 1),   NQO.PauliStr.from_XZ_string('01;11', +1), NQO.PauliStr.from_XZ_string('01;11', -1), NQO.PauliStr.from_XZ_string('01;11', -1)]
-    XX_dict[(1, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('11;11', 1),   NQO.PauliStr.from_XZ_string('11;11', +1), NQO.PauliStr.from_XZ_string('11;11', -1), NQO.PauliStr.from_XZ_string('11;11', -1)]
+    XX_dict[(0, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('00;11', 1),   NQO.PauliStr.from_XZ_string('00;11', -1), NQO.PauliStr.from_XZ_string('10;01', -1j), NQO.PauliStr.from_XZ_string('10;01', +1j)]
+    XX_dict[(1, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('10;11', 1),   NQO.PauliStr.from_XZ_string('10;11', -1), NQO.PauliStr.from_XZ_string('00;01', -1j), NQO.PauliStr.from_XZ_string('00;01', +1j)]
+    XX_dict[(0, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('01;11', 1),   NQO.PauliStr.from_XZ_string('01;11', +1), NQO.PauliStr.from_XZ_string('01;11', +1) , NQO.PauliStr.from_XZ_string('01;11', +1)]
+    XX_dict[(1, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('11;11', 1),   NQO.PauliStr.from_XZ_string('11;11', +1), NQO.PauliStr.from_XZ_string('11;11', +1) , NQO.PauliStr.from_XZ_string('11;11', +1)]
 
 
     def __init__(self, N=10, coeff=None, Xs=None, Zs=None):
@@ -172,6 +183,7 @@ class StabilizerSet():
 
         self.X_arr[index, :] = X_int
         self.Z_arr[index, :] = Z_int
+        self.coeff[index] = coeff
 
 
     def dot(self, PStr_B):
@@ -318,17 +330,7 @@ class StabilizerSet():
 
         rand = random.randint(0, 3) # random integer from {0, 1, 2, 3}
 
-        Z_dict = {}
-        Z_dict[(0, 0)] = [NQO.PauliStr.Id(coeff=+1),   NQO.PauliStr.Id(coeff=1),
-                          NQO.PauliStr.Id(coeff=+1),   NQO.PauliStr.Id(coeff=1)]
-        Z_dict[(1, 0)] = [NQO.PauliStr.XI(coeff=+1),   NQO.PauliStr.XI(coeff=-1),
-                          NQO.PauliStr.XZ(coeff=+1),   NQO.PauliStr.XZ(coeff=-1)]
-        Z_dict[(0, 1)] = [NQO.PauliStr.IZ(coeff=+1),   NQO.PauliStr.IZ(coeff=1),
-                          NQO.PauliStr.IZ(coeff=+1),   NQO.PauliStr.IZ(coeff=1)]
-        Z_dict[(1, 1)] = [NQO.PauliStr.XZ(coeff=+1),   NQO.PauliStr.XZ(coeff=-1),
-                          NQO.PauliStr.XI(coeff=+1),   NQO.PauliStr.XI(coeff=-1)]
-
-        new_strings = [Z_dict[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
+        new_strings = [self.Z_dict[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
 
         signs = np.array([new_strings[n].coeff for n in range(self.N)])
         new_X = np.array([new_strings[n].X_arr[0] for n in range(self.N)])
@@ -336,6 +338,34 @@ class StabilizerSet():
 
         self.X_arr[:, pos] = new_X
         self.Z_arr[:, pos] = new_Z
+        self.coeff *= signs
+
+
+    def random_XX_gate(self, pos1, pos2):
+        r"""
+        Apply gate of the form U = exp(i J Xi Xj) to the state of the system.
+
+        At the level of the stabilizers, this leads to a transformation 
+
+            S -> U^dagger S U
+
+        This leads to the following possiblilties:
+
+            Zi -> \pm Zi
+        or  Zi -> \pm Zi Xi Xj
+        """
+
+        rand = random.randint(0, 3) # random integer from {0, 1, 2, 3} (= #gates)
+
+        new_strings = [self.XX_dict[(self.X_arr[n, pos1], self.Z_arr[n, pos1],
+                                     self.X_arr[n, pos2], self.Z_arr[n, pos2])][rand] for n in range(self.N)]
+
+        signs = np.array([new_strings[n].coeff for n in range(self.N)])
+        new_X = np.array([new_strings[n].X_arr for n in range(self.N)])
+        new_Z = np.array([new_strings[n].Z_arr for n in range(self.N)])
+
+        self.X_arr[:, [pos1, pos2]] = new_X
+        self.Z_arr[:, [pos1, pos2]] = new_Z
         self.coeff *= signs
 
 
