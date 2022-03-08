@@ -56,6 +56,8 @@ class StabilizerSet():
     P3_array = np.array([[1, 0],  [0, -1]])
 
 
+    """ Scheduled for removal - only here to check with automoatically
+        generated versions """
     Z_dict_old = {}
     Z_dict_old[(0, 0)] = [NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1),
                       NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1)]
@@ -414,6 +416,31 @@ class StabilizerSet():
 
 
     def generate_XX_gates(self):
+        """
+        Generate the allowed transitions between Pauli strings as a
+        dictionary. The input (key) is a tuple of integers that correspond to
+        the initial Pauli strings on two sites, i and j:
+
+            (x_i z_i) ; (x_j z_j)
+
+        The output of the dictionary is a list of output strings generated
+        by the XX gates belonging to the Clifford group:
+
+            (x_i z_i) ; (x_j z_j) --> U^dagger (x_i z_i) ; (x_j z_j) U
+
+        Each list has the same length, which corresonds to the number of
+        unitaries. These unitaries are
+
+            U[k] = exp(-i J[k] X_i X_j),
+
+        where J[k] belongs to {0, pi/2, pi, 3 pi/2}.
+
+        Make use of the BCH identity, which gives
+
+            U^dagger[k] S U[k] = S, if [S, Z_i] = 0
+                            or = [cos(h) + 1j sin(h) Z_i] S, if {S, Z_i} = 0
+
+        """
 
         XX_string = NQO.PauliStr.from_char_string('xx')
 
@@ -433,17 +460,49 @@ class StabilizerSet():
                             self.XX_moves[(x_i, z_i, x_j, z_j)] += [NQO.PauliStr.copy(PStr)]*4
 
                         else:
+                            # cos(0) (x_i z_i) ; (x_j z_j)
                             self.XX_moves[(x_i, z_i, x_j, z_j)].append(NQO.PauliStr.copy(PStr))
+
                             PStr.rescale(-1)
+                            # cos(pi) (x_i z_i) ; (x_j z_j)
                             self.XX_moves[(x_i, z_i, x_j, z_j)].append(NQO.PauliStr.copy(PStr))
+
                             PStr.apply(XX_string)
                             PStr.rescale(1j)
+                            # 1j sin(pi/2) (X_i X_j) (x_i z_i) ; (x_j z_j)
                             self.XX_moves[(x_i, z_i, x_j, z_j)].append(NQO.PauliStr.copy(PStr))
+
                             PStr.rescale(-1)
+                            # 1j sin(3 pi/2) (X_i X_j) (x_i z_i) ; (x_j z_j)
                             self.XX_moves[(x_i, z_i, x_j, z_j)].append(NQO.PauliStr.copy(PStr))
 
 
     def generate_Z_gates(self):
+        """
+        Generate the allowed transitions between Pauli strings as a
+        dictionary. The input (key) is a tuple of integers that correspond to
+        the initial Pauli strings on one site, labelled i:
+
+            (x_i z_i)
+
+        The output of the dictionary is a list of output strings generated
+        by the Z gates belonging to the Clifford group:
+
+            (x_i z_i) --> U^dagger (x_i z_i) U
+
+        Each list has the same length, which corresonds to the number of
+        unitaries. These unitaries are
+
+            U[k] = exp(-i h[k] Z_i),
+
+        where h[k] belongs to {0, pi/2, pi, 3 pi/2}.
+
+        Make use of the BCH identity, which gives
+
+            U^dagger[k] S U[k] = S, if [S, Z_i] = 0
+                            or = [cos(h) + 1j sin(h) Z_i] S, if {S, Z_i} = 0
+
+        """
 
         Z_string = NQO.PauliStr.from_char_string('z')
 
@@ -461,11 +520,18 @@ class StabilizerSet():
                     self.Z_moves[(x_i, z_i)] += [NQO.PauliStr.copy(PStr)]*4
 
                 else:
+                    # cos(0) (x_i z_i)
                     self.Z_moves[(x_i, z_i)].append(NQO.PauliStr.copy(PStr))
+
                     PStr.rescale(-1)
+                    # cos(pi) (x_i z_i)
                     self.Z_moves[(x_i, z_i)].append(NQO.PauliStr.copy(PStr))
+
                     PStr.apply(Z_string)
                     PStr.rescale(1j)
+                    # 1j sin(pi/2) Z_i (x_i z_i)
                     self.Z_moves[(x_i, z_i)].append(NQO.PauliStr.copy(PStr))
+
                     PStr.rescale(-1)
+                    # 1j sin(3 pi/2) Z_i (x_i z_i)
                     self.Z_moves[(x_i, z_i)].append(NQO.PauliStr.copy(PStr))
