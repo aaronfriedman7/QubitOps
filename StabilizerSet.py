@@ -311,7 +311,7 @@ class StabilizerSet():
             return np.sum(left_endpoints[:self.N//2]) - self.N//2
 
 
-    def random_Z_gate(self, pos):
+    def random_Z_gate(self, pos, gate=None):
         r"""
         Apply gate of the form U = exp(i h Z) to the state of the system.
 
@@ -328,7 +328,8 @@ class StabilizerSet():
         while     (10) -> (10) or (11) with a potential sign change    
         """
 
-        rand = random.randint(0, 3) # random integer from {0, 1, 2, 3}
+        # random integer from {0, 1, 2, 3} (= #gates) if gate not supplied
+        rand = gate if gate is not None else random.randint(0, 3) 
 
         new_strings = [self.Z_dict[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
 
@@ -341,7 +342,7 @@ class StabilizerSet():
         self.coeff *= signs
 
 
-    def random_XX_gate(self, pos1, pos2):
+    def random_XX_gate(self, pos1, pos2, gate=None):
         r"""
         Apply gate of the form U = exp(i J Xi Xj) to the state of the system.
 
@@ -355,7 +356,8 @@ class StabilizerSet():
         or  Zi -> \pm Zi Xi Xj
         """
 
-        rand = random.randint(0, 3) # random integer from {0, 1, 2, 3} (= #gates)
+        # random integer from {0, 1, 2, 3} (= #gates) if gate not supplied
+        rand = gate if gate is not None else random.randint(0, 3) 
 
         new_strings = [self.XX_dict[(self.X_arr[n, pos1], self.Z_arr[n, pos1],
                                      self.X_arr[n, pos2], self.Z_arr[n, pos2])][rand] for n in range(self.N)]

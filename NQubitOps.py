@@ -200,7 +200,7 @@ class PauliStr():
         
 
         assert((len(xz_str) % 2) == 0)
-        N = len(charstr)//2 + left_pad + right_pad
+        N = len(xz_str)//2 + left_pad + right_pad
 
         l_arr = np.zeros(left_pad, dtype='bool')
         r_arr = np.zeros(right_pad, dtype='bool')
