@@ -8,9 +8,41 @@ Created on Fri Oct  2 13:34:49 2020
 Disclaimer: For internal / private use only; please do not share without my permission.
 """
 import numpy as np
-import sympy
+import numba
 import random
 import NQubitOps as NQO
+
+@numba.jit(nopython=True)
+def GF2elim(M):
+
+    m, n = M.shape
+
+    i = 0
+    j = 0
+
+    while i < m and j < n:
+        # find index of max element in rest of column j
+        k = np.argmax(M[i:, j]) + i
+
+        # swap rows
+        temp = np.copy(M[k])
+        M[k] = M[i]
+        M[i] = temp
+
+        aijn = M[i, j:]
+
+        col = np.copy(M[:, j])
+        col[i] = 0 #do not xor pivot row with itself
+
+        flip = np.outer(col, aijn)
+
+        M[:, j:] = M[:, j:] ^ flip
+
+        i += 1
+        j += 1
+
+    return M
+
 
 ####### Stabilizer Set Object
 ##############################################################################
@@ -229,8 +261,11 @@ class StabilizerSet():
         self.coeff[index] = self.coeff[index] * PStr_B.coeff * (-1)**(np.sum(sign_arr) % 2)
 
 
-    def entanglement_entropy(self, pos=None):
+    def entanglement_entropy(self):
         """
+        Half chain entanglement entropy.
+    
+
         Find the entanglement entropy of the state specified by the set of
         stabilizers. This works by performing a Gaussian elimination to find
         the left-endpoints in the "clipped gauge". The formula for the
@@ -240,13 +275,6 @@ class StabilizerSet():
 
         where rho(y) is the density of left endpoints on site y.
 
-        Parameters
-        ----------
-        pos : integer, optional
-            position of the cut for computing the entanglement entropy.
-            The default is to evaluate the half-chain entropy.
-
-        Returns
         -------
         output: float
             value of the entanglement entropy (logarithm base 2)
@@ -258,27 +286,13 @@ class StabilizerSet():
         full_bitarr[:, ::2] = self.X_arr
         full_bitarr[:, 1::2] = self.Z_arr
 
-        # perform Gaussian elimination to row echelon form (not sure about
-        #   speed of this function)
-        result = sympy.Matrix(full_bitarr).rref()
-        clipped_int = np.array(result[0].tolist(), dtype='int')
+        full_bitarr = GF2elim(full_bitarr[:, :self.N])
 
-        full_bitarr = np.mod(clipped_int, 2)
+        allzero = np.all(np.logical_not(full_bitarr), axis=1)
 
-        # find left end points: argmax returns argument of first True
-        first_nonzero = (full_bitarr!=0).argmax(axis=1) // 2
+        SvN = self.N - np.sum(allzero) - self.N//2
 
-        left_endpoints = np.zeros(self.N, dtype='int')
-
-        #unique, counts = np.unique(first_nonzero, return_counts=True)
-        #left_endpoints[unique] += counts
-        np.add.at(left_endpoints, first_nonzero, 1)
-
-        if pos is not None:
-            assert((pos > 0) and (pos < self.N))
-            return np.sum(left_endpoints[:pos]) - pos
-        else:
-            return np.sum(left_endpoints[:self.N//2]) - self.N//2
+        return SvN
 
 
     def random_Z_gate(self, pos, gate=None):

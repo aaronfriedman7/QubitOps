@@ -12,7 +12,7 @@ import random
 import numpy as np
 import sys
 
-Nsite = 10
+Nsite = 16
 depth = Nsite*5
 Nmeasure = 20
 Nhist = 100
