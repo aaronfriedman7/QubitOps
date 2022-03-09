@@ -296,12 +296,21 @@ class StabilizerSet():
         
         therefore (01) -> (01) always
         while     (10) -> (10) or (11) with a potential sign change    
+
+        Parameters
+        ----------
+        pos : integer
+            location at which the gate is to be applied
+        gate : integer, optional
+            gate to be applied from the list of possible unitaries
+
         """
 
         # random integer from {0, 1, 2, 3} (= #gates) if gate not supplied
         rand = gate if gate is not None else random.randint(0, 3) 
 
-        new_strings = [self.Z_moves[(self.X_arr[n, pos], self.Z_arr[n, pos])][rand] for n in range(self.N)]
+        new_strings = [self.Z_moves[(self.X_arr[n, pos],
+                                     self.Z_arr[n, pos])][rand] for n in range(self.N)]
 
         signs = np.array([new_strings[n].coeff for n in range(self.N)])
         new_X = np.array([new_strings[n].X_arr[0] for n in range(self.N)])
@@ -324,6 +333,16 @@ class StabilizerSet():
 
             Zi -> \pm Zi
         or  Zi -> \pm Zi Xi Xj
+
+        Parameters
+        ----------
+        pos1 : integer
+            first location at which two site gate is to be applied
+        pos2 : integer
+            second location at which two site gate is to be applied
+        gate : integer, optional
+            gate to be applied from list of possible unitaries
+
         """
 
         # random integer from {0, 1, 2, 3} (= #gates) if gate not supplied
@@ -481,7 +500,8 @@ class StabilizerSet():
                     elif (zs == 1):
                         out += "z"
                     else:
-                        raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
+                        raise ValueError("Unexpected value in Z_arr: {}, "+
+                                         "must be either 0 or 1".format(zs))
                 elif (xs == 1):
                     if (zs == 0):
                         out += "x"
@@ -489,9 +509,11 @@ class StabilizerSet():
                         out += "y"
                         prefactor *= (-1j)
                     else:
-                        raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
+                        raise ValueError("Unexpected value in Z_arr: {}, "+
+                                         "must be either 0 or 1".format(zs))
                 else:
-                    raise ValueError("Unexpected value in X_arr: {}, must be either 0 or 1".format(xs))
+                    raise ValueError("Unexpected value in X_arr: {}, "+
+                                     "must be either 0 or 1".format(xs))
 
             print(self.coeff[i]*prefactor, out)
 
