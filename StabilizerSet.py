@@ -56,41 +56,6 @@ class StabilizerSet():
     P3_array = np.array([[1, 0],  [0, -1]])
 
 
-    """ Scheduled for removal - only here to check with automoatically
-        generated versions """
-    Z_dict_old = {}
-    Z_dict_old[(0, 0)] = [NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1),
-                      NQO.PauliStr.Id(coeff=+1) , NQO.PauliStr.Id(coeff=1)]
-    Z_dict_old[(1, 0)] = [NQO.PauliStr.XI(coeff=+1) , NQO.PauliStr.XI(coeff=-1),
-                      NQO.PauliStr.XZ(coeff=+1j), NQO.PauliStr.XZ(coeff=-1j)]
-    Z_dict_old[(0, 1)] = [NQO.PauliStr.IZ(coeff=+1) , NQO.PauliStr.IZ(coeff=1),
-                      NQO.PauliStr.IZ(coeff=+1) , NQO.PauliStr.IZ(coeff=1)]
-    Z_dict_old[(1, 1)] = [NQO.PauliStr.XZ(coeff=+1) , NQO.PauliStr.XZ(coeff=-1),
-                      NQO.PauliStr.XI(coeff=+1j), NQO.PauliStr.XI(coeff=-1j)]
-
-
-    XX_dict_old = {}
-    XX_dict_old[(0, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('00;00', 1),   NQO.PauliStr.from_XZ_string('00;00', +1), NQO.PauliStr.from_XZ_string('00;00', +1) , NQO.PauliStr.from_XZ_string('00;00', +1)]
-    XX_dict_old[(1, 0, 0, 0)] = [NQO.PauliStr.from_XZ_string('10;00', 1),   NQO.PauliStr.from_XZ_string('10;00', +1), NQO.PauliStr.from_XZ_string('10;00', +1) , NQO.PauliStr.from_XZ_string('10;00', +1)]
-    XX_dict_old[(0, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('01;00', 1),   NQO.PauliStr.from_XZ_string('01;00', -1), NQO.PauliStr.from_XZ_string('11;10', -1j), NQO.PauliStr.from_XZ_string('11;10', +1j)]
-    XX_dict_old[(1, 1, 0, 0)] = [NQO.PauliStr.from_XZ_string('11;00', 1),   NQO.PauliStr.from_XZ_string('11;00', -1), NQO.PauliStr.from_XZ_string('01;10', -1j), NQO.PauliStr.from_XZ_string('01;10', +1j)]
-
-    XX_dict_old[(0, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('00;10', 1),   NQO.PauliStr.from_XZ_string('00;10', +1), NQO.PauliStr.from_XZ_string('00;10', +1) , NQO.PauliStr.from_XZ_string('00;10', +1)]
-    XX_dict_old[(1, 0, 1, 0)] = [NQO.PauliStr.from_XZ_string('10;10', 1),   NQO.PauliStr.from_XZ_string('10;10', +1), NQO.PauliStr.from_XZ_string('10;10', +1) , NQO.PauliStr.from_XZ_string('10;10', +1)]
-    XX_dict_old[(0, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('01;10', 1),   NQO.PauliStr.from_XZ_string('01;10', -1), NQO.PauliStr.from_XZ_string('11;00', -1j), NQO.PauliStr.from_XZ_string('11;00', +1j)]
-    XX_dict_old[(1, 1, 1, 0)] = [NQO.PauliStr.from_XZ_string('11;10', 1),   NQO.PauliStr.from_XZ_string('11;10', -1), NQO.PauliStr.from_XZ_string('01;00', -1j), NQO.PauliStr.from_XZ_string('01;00', +1j)]
-
-    XX_dict_old[(0, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('00;01', 1),   NQO.PauliStr.from_XZ_string('00;01', -1), NQO.PauliStr.from_XZ_string('10;11', -1j), NQO.PauliStr.from_XZ_string('10;11', +1j)]
-    XX_dict_old[(1, 0, 0, 1)] = [NQO.PauliStr.from_XZ_string('10;01', 1),   NQO.PauliStr.from_XZ_string('10;01', -1), NQO.PauliStr.from_XZ_string('00;11', -1j), NQO.PauliStr.from_XZ_string('00;11', +1j)]
-    XX_dict_old[(0, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('01;01', 1),   NQO.PauliStr.from_XZ_string('01;01', +1), NQO.PauliStr.from_XZ_string('01;01', +1) , NQO.PauliStr.from_XZ_string('01;01', +1)]
-    XX_dict_old[(1, 1, 0, 1)] = [NQO.PauliStr.from_XZ_string('11;01', 1),   NQO.PauliStr.from_XZ_string('11;01', +1), NQO.PauliStr.from_XZ_string('11;01', +1) , NQO.PauliStr.from_XZ_string('11;01', +1)]
-
-    XX_dict_old[(0, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('00;11', 1),   NQO.PauliStr.from_XZ_string('00;11', -1), NQO.PauliStr.from_XZ_string('10;01', -1j), NQO.PauliStr.from_XZ_string('10;01', +1j)]
-    XX_dict_old[(1, 0, 1, 1)] = [NQO.PauliStr.from_XZ_string('10;11', 1),   NQO.PauliStr.from_XZ_string('10;11', -1), NQO.PauliStr.from_XZ_string('00;01', -1j), NQO.PauliStr.from_XZ_string('00;01', +1j)]
-    XX_dict_old[(0, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('01;11', 1),   NQO.PauliStr.from_XZ_string('01;11', +1), NQO.PauliStr.from_XZ_string('01;11', +1) , NQO.PauliStr.from_XZ_string('01;11', +1)]
-    XX_dict_old[(1, 1, 1, 1)] = [NQO.PauliStr.from_XZ_string('11;11', 1),   NQO.PauliStr.from_XZ_string('11;11', +1), NQO.PauliStr.from_XZ_string('11;11', +1) , NQO.PauliStr.from_XZ_string('11;11', +1)]
-
-
     def __init__(self, N=10, coeff=None, Xs=None, Zs=None):
         """
         Create Stabilizer object from boolean arrays representing the X and
@@ -375,6 +340,122 @@ class StabilizerSet():
         self.Z_arr[:, [pos1, pos2]] = new_Z
         self.coeff *= signs
 
+
+    def measure_Z(self, pos):
+        """
+        Perform a measurement on a single site, specified by the index "pos" 
+
+        Suppose that stabilizers g_i with i > k anticommute with Z, then
+        new set of stabilizers is:
+
+            {g_1, g_2, ..., g_k, g_{k+1} g_{k+2}, ..., g_{N-1} g_N, pm Z}
+
+        Computationally, we shift the array by one position
+
+        [ g_{k+1} ]
+                   \
+        [ g_{k+2} ]  [ g_{k+2} ]
+                   \
+                     [ g_{k+3} ] etc.
+
+        Pauli string multiplication uses similar code to the dot() function.
+        Function takes O(n^2) time
+
+        Parameters
+        ----------
+        pos : integer
+            location at which two site gate is to be applied
+
+        """
+
+        # presence of X implies anticommutativity with Z
+        anti = np.where(self.X_arr[:, pos] == True)[0]
+
+        if anti.size > 0:
+            # anticommutes so projected state is different from original
+
+            self.X_arr[anti[1:]] = np.logical_xor(self.X_arr[anti[1:], :],
+                                                  self.X_arr[anti[:-1], :])
+            self.Z_arr[anti[1:]] = np.logical_xor(self.Z_arr[anti[1:], :],
+                                                  self.Z_arr[anti[:-1], :])
+
+            sign_arr = np.logical_and(self.Z_arr[anti[1:], :],
+                                      self.X_arr[anti[:-1], :])
+            self.coeff[anti[1:]] = (self.coeff[anti[1:]] *
+                                    self.coeff[anti[:-1]] *
+                                    (-1)**(np.sum(sign_arr, axis=1) % 2))
+
+            where_first = anti[0]
+
+            self.X_arr[where_first, :] = np.zeros(self.N)
+            self.Z_arr[where_first, :] = np.zeros(self.N)
+            self.Z_arr[where_first, pos] = 1
+
+            if random.randint(0, 1):
+                self.coeff[where_first] = 1
+            else:
+                self.coeff[where_first] = -1
+
+
+    def measure_XX(self, pos1, pos2):
+        """
+        Perform a measurement on two sites, specified by the indices "pos1"
+        and "pos2" 
+
+        Suppose that stabilizers g_i with i > k anticommute with XX, then
+        new set of stabilizers is:
+
+            {g_1, g_2, ..., g_k, g_{k+1} g_{k+2}, ..., g_{N-1} g_N, pm Z}
+
+        Computationally, we shift the array by one position
+
+        [ g_{k+1} ]
+                   \
+        [ g_{k+2} ]  [ g_{k+2} ]
+                   \
+                     [ g_{k+3} ] etc.
+
+        Pauli string multiplication uses similar code to the dot() function.
+        Function takes O(n^2) time.
+
+        Parameters
+        ----------
+        pos1 : integer
+            first location at which two site gate is to be applied
+        pos2 : integer
+            second location at which two site gate is to be applied
+
+        """
+
+        # presence of exactly one Z implies anticommutativity with XX
+        anti = np.where(np.logical_xor(self.Z_arr[:, pos1],
+                                       self.Z_arr[:, pos2]) == True)[0]
+
+        if anti.size > 0:
+            # anticommutes so projected state is different from original
+
+            self.X_arr[anti[1:]] = np.logical_xor(self.X_arr[anti[1:], :],
+                                                  self.X_arr[anti[:-1], :])
+            self.Z_arr[anti[1:]] = np.logical_xor(self.Z_arr[anti[1:], :],
+                                                  self.Z_arr[anti[:-1], :])
+
+            sign_arr = np.logical_and(self.Z_arr[anti[1:], :],
+                                      self.X_arr[anti[:-1], :])
+            self.coeff[anti[1:]] = (self.coeff[anti[1:]] *
+                                    self.coeff[anti[:-1]] *
+                                    (-1)**(np.sum(sign_arr, axis=1) % 2))
+
+            where_first = anti[0]
+
+            self.X_arr[where_first, :] = np.zeros(self.N)
+            self.Z_arr[where_first, :] = np.zeros(self.N)
+            self.Z_arr[where_first, pos1] = True
+            self.Z_arr[where_first, pos2] = True
+
+            if random.randint(0, 1):
+                self.coeff[where_first] = 1
+            else:
+                self.coeff[where_first] = -1
 
     def print_stabilizers(self):
         """
