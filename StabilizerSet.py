@@ -449,8 +449,8 @@ class StabilizerSet():
 
             self.X_arr[where_first, :] = np.zeros(self.N)
             self.Z_arr[where_first, :] = np.zeros(self.N)
-            self.Z_arr[where_first, pos1] = True
-            self.Z_arr[where_first, pos2] = True
+            self.X_arr[where_first, pos1] = True
+            self.X_arr[where_first, pos2] = True
 
             if random.randint(0, 1):
                 self.coeff[where_first] = 1
