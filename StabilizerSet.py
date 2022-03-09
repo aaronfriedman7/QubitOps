@@ -476,6 +476,26 @@ class StabilizerSet():
             else:
                 self.coeff[where_first] = -1
 
+
+    def X_magnetization(self):
+        """
+        Magnetisation in the X direction. Not normalized, so gives
+
+            < sum_i X_i >
+
+        Returns
+        ----------
+        output : integer
+            expectation value of magnetisation, equal to the number of 
+            sites i satisfying all(z_i) = 0
+        """
+
+        # test whether all equal to 0 at particular position for all strings
+        all_vanish = np.all(np.logical_not(self.Z_arr), axis=0)
+
+        return np.sum(all_vanish)
+
+
     def print_stabilizers(self):
         """
         Print the content of the StabilizerSet in human readable format
