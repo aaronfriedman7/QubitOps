@@ -100,7 +100,6 @@ class PauliStr():
         # overall magnitude and  phase
         self.coeff = coeff                  
 
-
     ### Alternate instantiation:
     @classmethod
     def from_char_string(cls, charstr, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
@@ -165,7 +164,26 @@ class PauliStr():
 
         return cls(N, coeff, X_int, Z_int)
     
-        ### Alternate instantiation:
+    ### Alternate instantiation:
+    @classmethod
+    def clone(cls, PStr):
+        """
+        Instantiation as a clone of existing PauliString
+
+        Parameters
+        ----------
+        PStr : PauliStr
+            The PauliStr object to be cloned.
+
+        Returns
+        -------
+        PauliStr
+            New PauliStr object with same properties as PStr.
+
+        """
+        return cls(PStr.N, PStr.coeff, PStr.X_arr, PStr.Z_arr)
+    
+    ### Alternate instantiation:
     @classmethod
     def from_XZ_string(cls, xz_str, coeff=1.0 + 0.0j, left_pad=0, right_pad=0):
         """
@@ -273,21 +291,21 @@ class PauliStr():
     
 
     @classmethod
-    def Xop(cls, coeff=1.0+0.0j):
+    def Xop(cls, coeff=1.0+0.0*1j):
         """ Single site X operator, multiplied by coeff """
         return cls(1, coeff, np.array([1]), np.array([0]))
 
 
     @classmethod
-    def Zop(cls, coeff=1.0+0.0j):
+    def Zop(cls, coeff=1.0+0.0*1j):
         """ Single site Z operator, multiplied by coeff """
         return cls(1, coeff, np.array([0]), np.array([1]))
 
 
     @classmethod
-    def Yop(cls, coeff=1.0+0.0j):
+    def Yop(cls, coeff=1.0+0.0*1j):
         """ Single site Y operator, multiplied by coeff"""
-        return cls(1, -1.0j*coeff, np.array([1]), np.array([1]))
+        return cls(1, 1j*coeff, np.array([1]), np.array([1]))
 
 
 
@@ -304,15 +322,18 @@ class PauliStr():
         """
 
         assert(self.N == PStr_B.N)
-
-        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
-        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
-
+        
         flip = bool(np.sum(np.logical_and(self.Z_arr, PStr_B.X_arr)) % 2)
         if flip:
             self.coeff *= -PStr_B.coeff
         else:
             self.coeff *= PStr_B.coeff 
+
+        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
+        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
+
+        
+        
 
 
     def apply(self, PStr_B):
@@ -328,15 +349,17 @@ class PauliStr():
         """
 
         assert(self.N == PStr_B.N)
-
-        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
-        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
-
+        
         flip = bool(np.sum(np.logical_and(self.X_arr, PStr_B.Z_arr)) % 2)
         if flip:
             self.coeff *= -PStr_B.coeff
         else:
             self.coeff *= PStr_B.coeff
+
+        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
+        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
+
+        
         
             
     def rescale(self, scale):
@@ -382,7 +405,7 @@ class PauliStr():
                     out += "x"
                 elif (zs == 1):
                     out += "y"
-                    prefactor *= (-1j)
+                    prefactor *= -1j
                 else:
                     raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
             else:
@@ -426,17 +449,20 @@ class PauliStr():
         """
 
         assert(PStr_A.N == PStr_B.N)
+        
+        flip = bool(np.sum(np.logical_and(PStr_A.Z_arr, PStr_B.X_arr)) % 2)
+        
+        if flip:
+            new_coeff = -PStr_A.coeff * PStr_B.coeff
+        else:
+            new_coeff = PStr_A.coeff * PStr_B.coeff
 
         new_X_arr = np.logical_xor(PStr_A.X_arr, PStr_B.X_arr)
         new_Z_arr = np.logical_xor(PStr_A.Z_arr, PStr_B.Z_arr)
         
-        flip = bool(np.sum(np.logical_and(PStr_A.Z_arr, PStr_B.X_arr)) % 2)
-        if flip:
-            new_coeff = -PStr_A.coeff * PStr_B.coeff
-        else:
-            new_coeff = PStr_A.coeff * PStr_B.coeff 
+        C = PauliStr(PStr_A.N, new_coeff, new_X_arr, new_Z_arr)
 
-        return PauliStr(PStr_A.N, new_coeff, new_X_arr, new_Z_arr)
+        return C
 
 
     @staticmethod
@@ -524,7 +550,9 @@ class PauliStr():
         assert(PStr_A.N == PStr_B.N)
         
         if not PauliStr.check_comm(PStr_A, PStr_B):
-            return (PauliStr.product(PStr_A, PStr_B)).rescale(2.0)
+            C = PauliStr.product(PStr_A, PStr_B)
+            C.rescale(2.0)
+            return C
         else:
             return PauliStr.null_str(PStr_A.N)
         
@@ -553,7 +581,9 @@ class PauliStr():
         assert(PStr_A.N == PStr_B.N)
         
         if not PauliStr.check_anticomm(PStr_A, PStr_B):
-            return (PauliStr.product(PStr_A, PStr_B)).rescale(2.0)
+            C = PauliStr.product(PStr_A, PStr_B)
+            C.rescale(2.0)
+            return C
         else:
             return PauliStr.null_str(PStr_A.N)
 
