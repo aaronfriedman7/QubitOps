@@ -7,7 +7,24 @@ Disclaimer: For internal / private use only; please do not share without permiss
 """
 
 import numpy as np
+import scipy.sparse as ss
 
+
+### The Pauli matrices (and identity) as DENSE numpy arrays (ndarray)
+P0_array = np.eye(2)
+P1_array = np.array([[0, 1],  [1, 0]])
+P2_array = np.array([[0, -1j],[1j, 0]])
+P3_array = np.array([[1, 0],  [0, -1]])
+
+Dense_Paulis = [P0_array, P1_array, P2_array, P3_array]
+
+### The Pauli matrices (and identity) as SPARSE scipy arrays (scipy.sparse.csr_matrix)
+P0_sparse = ss.csr_matrix((np.array([1.0,1.0]),(np.array([0,1]),np.array([0,1]))), shape=(2,2), dtype='complex')
+P1_sparse = ss.csr_matrix((np.array([1.0,1.0]),(np.array([0,1]),np.array([1,0]))), shape=(2,2), dtype='complex')
+P2_sparse = ss.csr_matrix((np.array([-1.0j,1.0j]),(np.array([0,1]),np.array([1,0]))), shape=(2,2), dtype='complex')
+P3_sparse = ss.csr_matrix((np.array([1.0,-1.0]),(np.array([0,1]),np.array([0,1]))), shape=(2,2), dtype='complex')
+
+Sparse_Paulis = [P0_sparse, P1_sparse, P2_sparse, P3_sparse]
 
 
 ####### Pauli String Object
@@ -46,12 +63,11 @@ class PauliStr():
         a boolean array, giving the sites on which an "Z" acts ("1" for a Z)
         
     """
+
+    PauliIntDict = {(False,False): 0, (True,False): 1, (True,True): 2, (False, True): 3}
     
-    ### The Pauli matrices (and identity)
-    P0_array = np.eye(2)
-    P1_array = np.array([[0, 1],  [1, 0]])
-    P2_array = np.array([[0, -1j],[1j, 0]])
-    P3_array = np.array([[1, 0],  [0, -1]])
+    PauliStrDict = {(False,False): 'e', (True,False): 'x', (True,True): 'y', (False, True): 'z'}
+    
     
     ### characters to ignore when initializing from a character string
     ignored_chars = [",", " ", "_", ";"]
@@ -332,9 +348,6 @@ class PauliStr():
         self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
         self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
 
-        
-        
-
 
     def apply(self, PStr_B):
         """
@@ -359,8 +372,6 @@ class PauliStr():
         self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr)
         self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr)
 
-        
-        
             
     def rescale(self, scale):
         """
@@ -377,41 +388,96 @@ class PauliStr():
         self.coeff *= scale
 
 
-### We might want to improve the print string function
-
+### We might want to improve the print string function?
+    
+    def where_Id(self):
+        NxORz = np.logical_not(np.logical_or(self.X_arr,self.Z_arr))
+        return np.nonzero(NxORz)
+    
+    def where_X(self):
+        xNOTz = np.logical_and(self.X_arr,np.logical_not(self.Z_arr))
+        return np.nonzero(xNOTz)
+    
+    def where_Y(self):
+        xANDz = np.logical_and(self.X_arr,self.Z_arr)
+        return np.nonzero(xANDz)
+    
+    def where_Z(self):
+        zNOTx = np.logical_and(self.Z_arr,np.logical_not(self.X_arr))
+        return np.nonzero(zNOTx)
+    
+    
+### note zip(A,B) is an iterable
+### [foo for foo in zip(A,B)] = [(a_0,b_0), (a_1,b_1), ... (a_{n-1} , b_{n-1})]
+    
+    @property
+    def char_list(self):
+        return [PauliStr.PauliStrDict[guy] for guy in zip(self.X_arr,self.Z_arr)]
+    
+    @property
+    def int_list(self):
+        return [PauliStr.PauliIntDict[guy] for guy in zip(self.X_arr,self.Z_arr)]
+    
+    
+    @property
+    def char_string(self):
+        prefactor = self.coeff
+        PauliOrder = [PauliStr.PauliStrDict[guy] for guy in zip(self.X_arr,self.Z_arr)]
+        out = "".join(PauliOrder)
+        numys = out.count("y")
+        prefactor *= ((-1j)**numys)
+        return (prefactor, out)
+    
+    @property
+    def int_string(self):
+        prefactor = self.coeff
+        PauliOrder = [str(PauliStr.PauliIntDict[guy]) for guy in zip(self.X_arr,self.Z_arr)]
+        out = "".join(PauliOrder)
+        numys = out.count("2")
+        prefactor *= ((-1j)**numys)
+        return (prefactor, out)
+    
+   
     def print_string(self):
-        """
-        Print the content of the Pauli string in human readable format
-        P_0 -> "e"
-        P_1 -> "x"
-        P_2 -> "y"
-        P_3 -> "z"
-        The overall magnitude and phase of the string is printed along with
-        its operator content.
-        """
-        out = ""
-        prefactor = 1.0
+        prefactor = self.coeff
+        PauliOrder = [PauliStr.PauliStrDict[guy] for guy in zip(self.X_arr,self.Z_arr)]
+        out = "".join(PauliOrder)
+        prefactor *= ((-1j)**(out.count("y")))
+        print("Pauli string: ", prefactor, out)
+    
+    
+    def to_ndarray(self):
+        ints = self.int_list
+        prefactor = self.coeff
+        numys = ints.count(2)
+        prefactor *= ((-1j)**numys)
+        assert len(ints) == self.N
+        
+        Op = Dense_Paulis[ints[0]]
+        for foo in range(1,self.N):
+            nextguy = Dense_Paulis[ints[foo]]
+            Op = np.kron(Op,nextguy)
+        
+        assert np.shape(Op) == (2**self.N,2**self.N)
+        
+        return prefactor*Op
+        
 
-        for xs, zs in zip(self.X_arr, self.Z_arr):
-            if (xs == 0):
-                if (zs == 0):
-                    out += "e"
-                elif (zs == 1):
-                    out += "z"
-                else:
-                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
-            elif (xs == 1):
-                if (zs == 0):
-                    out += "x"
-                elif (zs == 1):
-                    out += "y"
-                    prefactor *= -1j
-                else:
-                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
-            else:
-                raise ValueError("Unexpected value in X_arr: {}, must be either 0 or 1".format(xs))
-
-        print("Pauli string: ", self.coeff*prefactor, out)
+    def to_sparse(self):
+        ints = self.int_list
+        prefactor = self.coeff
+        numys = ints.count(2)
+        prefactor *= ((-1j)**numys)
+        assert len(ints) == self.N
+        
+        Op = Sparse_Paulis[ints[0]]
+        for foo in range(1,self.N):
+            nextguy = Sparse_Paulis[ints[foo]]
+            Op = ss.kron(Op,nextguy)
+        Op.multiply(prefactor)
+        
+        return Op
+    
     
     
     def copy(self):
@@ -426,6 +492,12 @@ class PauliStr():
 
         """
         return PauliStr(self.N, self.coeff, self.X_arr, self.Z_arr)
+    
+    
+    
+    
+    
+    
 
 
     ### Static methods (take instances of the class as arguments...NOT in place)
@@ -588,6 +660,46 @@ class PauliStr():
             return PauliStr.null_str(PStr_A.N)
 
     
+
+
+
+#### OLD and deprecated PauliStr methods
+
+
+
+    def old_print_string(self):
+        """
+        Print the content of the Pauli string in human readable format
+        P_0 -> "e"
+        P_1 -> "x"
+        P_2 -> "y"
+        P_3 -> "z"
+        The overall magnitude and phase of the string is printed along with
+        its operator content.
+        """
+        out = ""
+        prefactor = 1.0
+
+        for xs, zs in zip(self.X_arr, self.Z_arr):
+            if (xs == 0):
+                if (zs == 0):
+                    out += "e"
+                elif (zs == 1):
+                    out += "z"
+                else:
+                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
+            elif (xs == 1):
+                if (zs == 0):
+                    out += "x"
+                elif (zs == 1):
+                    out += "y"
+                    prefactor *= -1j
+                else:
+                    raise ValueError("Unexpected value in Z_arr: {}, must be either 0 or 1".format(zs))
+            else:
+                raise ValueError("Unexpected value in X_arr: {}, must be either 0 or 1".format(xs))
+
+        print("Pauli string: ", self.coeff*prefactor, out)
     
     @staticmethod
     def old_commutator(PStr_A, PStr_B, anti = False):
@@ -668,7 +780,7 @@ class Operator():
     
     ### current idea is simply store a list of Pauli strings, always check if a Pauli string is already in the list...order the list? idk.
 
-
+    ### include from dense / sparse method
 
 
 

@@ -204,7 +204,7 @@ class StabilizerSet():
             current string)
         """
 
-        assert(self.N == SetB.N)
+        assert(self.N == PStr_B.N)
 
         self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr[np.newaxis, :])
         self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr[np.newaxis, :])
@@ -229,7 +229,7 @@ class StabilizerSet():
             current string)
         """
 
-        assert(self.N == SetB.N)
+        assert(self.N == PStr_B.N)
 
         self.X_arr = np.logical_xor(PStr_B.X_arr[np.newaxis, :], self.X_arr)
         self.Z_arr = np.logical_xor(PStr_B.Z_arr[np.newaxis, :], self.Z_arr)

@@ -12,12 +12,6 @@ import timeit
 
 
 
-
-
-
-
-
-
 # create two long strings
 # PA = NQO.PauliStr.from_char_string('xyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyze', coeff=1)
 # PB = NQO.PauliStr.from_char_string('yzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzexyzex', coeff=1)
@@ -94,23 +88,31 @@ print()
 
 
 
-print("Checking `check_comm' functions for trivial commutators:")
-IIcomm = NQO.PauliStr.commutator(Id,Id)
-IIcomm.print_string()
-XXcomm = NQO.PauliStr.commutator(pX,pX)
-XXcomm.print_string()
-YYcomm = NQO.PauliStr.commutator(pY,pY)
-YYcomm.print_string()
-ZZcomm = NQO.PauliStr.commutator(pZ,pZ)
-ZZcomm.print_string()
-IXcomm = NQO.PauliStr.commutator(Id,pX)
-IXcomm.print_string()
-IYcomm = NQO.PauliStr.commutator(Id,pY)
-IYcomm.print_string()
-IZcomm = NQO.PauliStr.commutator(Id,pZ)
-IZcomm.print_string()
-print()
+# print("Checking commutators functions for trivial commutators:")
+# IIcomm = NQO.PauliStr.commutator(Id,Id)
+# IIcomm.print_string()
+# XXcomm = NQO.PauliStr.commutator(pX,pX)
+# XXcomm.print_string()
+# YYcomm = NQO.PauliStr.commutator(pY,pY)
+# YYcomm.print_string()
+# ZZcomm = NQO.PauliStr.commutator(pZ,pZ)
+# ZZcomm.print_string()
+# IXcomm = NQO.PauliStr.commutator(Id,pX)
+# IXcomm.print_string()
+# IYcomm = NQO.PauliStr.commutator(Id,pY)
+# IYcomm.print_string()
+# IZcomm = NQO.PauliStr.commutator(Id,pZ)
+# IZcomm.print_string()
+# print()
 
+print("Checking 'check_comm' for trivial commutators (true!): ")
+print(NQO.PauliStr.check_comm(Id,Id))
+print(NQO.PauliStr.check_comm(pX,pX))
+print(NQO.PauliStr.check_comm(pY,pY))
+print(NQO.PauliStr.check_comm(pZ,pZ))
+print(NQO.PauliStr.check_comm(pX,Id))
+print(NQO.PauliStr.check_comm(pY,Id))
+print(NQO.PauliStr.check_comm(pZ,Id))
 
 
 print("Checking commutators of nontrivial Paulis")
@@ -172,3 +174,23 @@ YZacomm = NQO.PauliStr.anticommutator(pY,pZ)
 YZacomm.print_string()
 print()
 
+
+print("creating a particular operator: XX")
+XXop = NQO.PauliStr.from_char_string(" x x ")
+XXop.print_string()
+
+A = XXop.to_ndarray()
+print("The numpy array version has type {}, shape {}, and looks like: ".format(type(A), np.shape(A)))
+print(A)
+print("and the square of this guy is: ")
+print(np.matmul(A,A))
+print()
+
+B = XXop.to_sparse()
+print("The scipy sparse version has type {}, shape {}, and direct print gives: ".format(type(B), B.shape))
+print(B)
+print("and converting to dense gives: ")
+print(B.toarray())
+print("and the square of this guy is: ")
+print((B.dot(B)).toarray())
+print()
