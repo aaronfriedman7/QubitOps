@@ -7,8 +7,60 @@ Created on Fri Oct  2 13:34:49 2020
 """
 import timeit
 import StabilizerSet as StSet
+import NQubitOps as NQO
+import numpy as np
 
 
+# entanglement entropy of a state
+def State_EntEnt(L, vec, cut):
+    lower = cut
+    upper = L - cut
+    Psi = np.reshape(vec,(2**(lower),2**(upper)))
+    lambdas = np.linalg.svd(Psi, compute_uv = False)
+    EntEnt = 0.0
+    for foo in range(len(lambdas)):
+        value = (lambdas[foo])**2
+        if value > 0.0:
+            EntEnt -= np.math.log(value)*value
+    return EntEnt
+
+def EntEnt(rho, L, cut):
+    assert cut < L and cut > 0
+    rhoAB = np.reshape(rho,(2**cut,2**(L-cut),2**cut,2**(L-cut)))
+    RDM = np.trace(rhoAB, offset=0, axis1=1, axis2=3)
+    probs, states = np.linalg.eigh(RDM)
+    S = - np.sum(probs[probs>1e-20]*np.log(probs[probs>1e-20]))
+    return S
+
+def Renyi0(rho, L, cut):
+    assert cut < L and cut > 0
+    rhoAB = np.reshape(rho,(2**cut,2**(L-cut),2**cut,2**(L-cut)))
+    RDM = np.trace(rhoAB, offset=0, axis1=1, axis2=3)
+    RDM = RDM**0
+    S = np.log(np.trace(RDM))
+    return S
+
+def Renyi2(rho, L, cut):
+    assert cut < L and cut > 0
+    rhoAB = np.reshape(rho,(2**cut,2**(L-cut),2**cut,2**(L-cut)))
+    RDM = np.trace(rhoAB, offset=0, axis1=1, axis2=3)
+    RDM = np.matmul(RDM,RDM)
+    S = - np.log(np.trace(RDM))
+    return S
+
+
+def RenyiN(rho, L, cut, n):
+    assert cut < L and cut > 0
+    assert n != 1
+    rhoAB = np.reshape(rho,(2**cut,2**(L-cut),2**cut,2**(L-cut)))
+    RDM = np.trace(rhoAB, offset=0, axis1=1, axis2=3)
+    m=1
+    placeholder = RDM.copy()
+    while m < n:
+        placeholder = np.matmul(placeholder,RDM)
+        m += 1
+    S = np.log(np.trace(RDM))/(1.0-float(n))
+    return S
 
 
 M = 6
@@ -90,12 +142,27 @@ XX = NQO.PauliStr.from_char_string("xxeeeeeeeeeeeeee")
 
 for i in range(num):
 	S_i = NQO.PauliStr(num, S3.coeff[i], S3.X_arr[i, :], S3.Z_arr[i, :])
-	isCommuting = NQO.PauliStr.check_comm(XX, S_i)
 
-	if isCommuting:
+	if NQO.PauliStr.check_comm(XX, S_i):
 		S_i.print_string()
 	else:
 		prod = NQO.PauliStr.product(XX, S_i)
 		prod.rescale(1j)
 		prod.print_string()
 
+
+L=8
+# stabilizers
+Gs = []
+g_strings = ["zeeeeeee", "zyeyxeex", "eezeeeee", "zxeeeeey", "eeezxeey", "eeeeezee", "eeeeeeze", "eeeyzeey"]
+
+for thong in g_strings:
+    newPauli = NQO.PauliStr.from_char_string(thong)
+    Gs.append(newPauli)
+
+
+densitymatrix = StSet.dmat_array(L, Gs)
+print("new density matrix has trace = {}".format(np.trace(densitymatrix)))
+
+S = EntEnt(densitymatrix,8,4)
+print("entanglement entropy is {} and log2 is {}".format(S,np.log(2.0)))
