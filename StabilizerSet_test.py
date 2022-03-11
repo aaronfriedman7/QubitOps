@@ -5,7 +5,7 @@ Created on Fri Oct  2 13:34:49 2020
 
 @author: Aaron + Ollie
 """
-import timeit
+import time
 import StabilizerSet as StSet
 import NQubitOps as NQO
 import numpy as np
@@ -138,6 +138,9 @@ S3.set_string(13, "xyeeeeeeeeeeeeee")
 S3.set_string(14, "zyeeeeeeeeeeeeee")
 S3.set_string(15, "yyeeeeeeeeeeeeee")
 
+
+
+start = time.time()
 XX = NQO.PauliStr.from_char_string("xxeeeeeeeeeeeeee")
 
 for i in range(num):
@@ -149,8 +152,10 @@ for i in range(num):
 		prod = NQO.PauliStr.product(XX, S_i)
 		prod.rescale(1j)
 		prod.print_string()
+end = time.time()
 
-
+print("elapsed time = {}".format(end-start))
+print()
 L=8
 # stabilizers
 Gs = []
@@ -165,4 +170,11 @@ densitymatrix = StSet.dmat_array(L, Gs)
 print("new density matrix has trace = {}".format(np.trace(densitymatrix)))
 
 S = EntEnt(densitymatrix,8,4)
-print("entanglement entropy is {} and log2 is {}".format(S,np.log(2.0)))
+print("vN entanglement entropy is {} and log2 is {}".format(S,np.log(2.0)))
+
+
+S0 = Renyi0(densitymatrix,8,4)
+print("Renyi 0 is {}".format(S0))
+
+S2 = Renyi2(densitymatrix,8,4)
+print("Renyi 2 is {}".format(S2))
