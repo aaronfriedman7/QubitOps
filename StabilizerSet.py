@@ -231,11 +231,11 @@ class StabilizerSet():
 
         assert(self.N == PStr_B.N)
 
-        self.X_arr = np.logical_xor(PStr_B.X_arr[np.newaxis, :], self.X_arr)
-        self.Z_arr = np.logical_xor(PStr_B.Z_arr[np.newaxis, :], self.Z_arr)
-
         sign_arr = np.logical_and(PStr_B.Z_arr[np.newaxis, :], self.X_arr)
         self.coeff = self.coeff * PStr_B.coeff * (-1)**(np.sum(sign_arr, axis=1) % 2)
+
+        self.X_arr = np.logical_xor(PStr_B.X_arr[np.newaxis, :], self.X_arr)
+        self.Z_arr = np.logical_xor(PStr_B.Z_arr[np.newaxis, :], self.Z_arr)
 
 
     def dot_single(self, index, PStr_B):
@@ -254,11 +254,11 @@ class StabilizerSet():
 
         assert(self.N == SetB.N)
 
-        self.X_arr[index, :] = np.logical_xor(self.X_arr[index, :], PStr_B.X_arr)
-        self.Z_arr[index, :] = np.logical_xor(self.Z_arr[index, :], PStr_B.Z_arr)
-
         sign_arr = np.logical_and(self.Z_arr[index, :], PStr_B.X_arr)
         self.coeff[index] = self.coeff[index] * PStr_B.coeff * (-1)**(np.sum(sign_arr) % 2)
+
+        self.X_arr[index, :] = np.logical_xor(self.X_arr[index, :], PStr_B.X_arr)
+        self.Z_arr[index, :] = np.logical_xor(self.Z_arr[index, :], PStr_B.Z_arr)
 
 
     def entanglement_entropy(self):
