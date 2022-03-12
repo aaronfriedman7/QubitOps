@@ -252,7 +252,7 @@ class StabilizerSet():
             current string)
         """
 
-        assert(self.N == SetB.N)
+        assert(self.N == PStr_B.N)
 
         sign_arr = np.logical_and(self.Z_arr[index, :], PStr_B.X_arr)
         self.coeff[index] = self.coeff[index] * PStr_B.coeff * (-1)**(np.sum(sign_arr) % 2)
@@ -672,3 +672,30 @@ class StabilizerSet():
                     PStr.rescale(-1)
                     # 1j sin(3 pi/2) Z_i (x_i z_i)
                     self.Z_moves[(x_i, z_i)].append(NQO.PauliStr.copy(PStr))
+
+
+def stabilizer_array(stabilizer):
+    Op = stabilizer.to_ndarray()
+    (d1,d2) = np.shape(Op)
+    assert d1==d2
+    Op += np.eye(d1)
+    return 0.5*Op
+
+
+def dmat_array(N, stabilizers):
+    assert N == len(stabilizers)
+    
+    rho = stabilizer_array(stabilizers[0])
+    
+    for foo in range(1,len(stabilizers)):
+        newguy = stabilizer_array(stabilizers[foo])
+        rho = np.matmul(rho,newguy)
+    
+    return rho
+    
+    
+    
+    
+    
+    
+    
