@@ -206,11 +206,11 @@ class StabilizerSet():
 
         assert(self.N == PStr_B.N)
 
-        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr[np.newaxis, :])
-        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr[np.newaxis, :])
-
         sign_arr = np.logical_and(self.Z_arr, PStr_B.X_arr[np.newaxis, :])
         self.coeff = self.coeff * PStr_B.coeff * (-1)**(np.sum(sign_arr, axis=1) % 2)
+
+        self.X_arr = np.logical_xor(self.X_arr, PStr_B.X_arr[np.newaxis, :])
+        self.Z_arr = np.logical_xor(self.Z_arr, PStr_B.Z_arr[np.newaxis, :])
 
 
     def apply(self, PStr_B):
