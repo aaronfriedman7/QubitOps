@@ -18,14 +18,21 @@ class StabilizerSet {
     void generate_Z_gates(void);
     void generate_XX_gates(void);
     void update_generators(vector<int> anticommuting);
+    void update_generators_signs(vector<int> anticommuting);
+    //void update_destabilizer(int row, vector<int> anticommuting);    
+    //void update_destabilizer_signs(int row, vector<int> anticommuting);
+
 
     vector<vector<bool>> GF2elim(vector<vector<bool>> M);
+    int pauliprod(bool x1, bool z1, bool x2, bool z2);
+    int newsign(int h, int j);
+    int newsign(vector<bool> X, vector<bool> Z, bool c, int row);
 
 public:
 
     StabilizerSet();
 
-    void set_string(int index, string chars, int left_pad);
+    void set_string(int index, string chars, int left_pad, bool c);
     void print_generators(void);
 
     void apply_Z_gate(int site, int set_gate);
@@ -37,6 +44,9 @@ public:
     void measure_XX(int site1, int site2);
 
     int halfchain_entanglement(void);
+    int magnetization_X(void);
+    int unsigned_magnetization_X(void);
+    int spinglass_orderparam (void);
 
     vector<vector<bool>> X_arr;
     vector<vector<bool>> Z_arr;
@@ -46,9 +56,9 @@ public:
     vector<vector<PauliStr>> Z_moves;
 };
 
-StabilizerSet::StabilizerSet(void) : X_arr(L, vector<bool>(L)),
-                                     Z_arr(L, vector<bool>(L)),
-                                     coeff(L),
+StabilizerSet::StabilizerSet(void) : X_arr(2*L, vector<bool>(L)),
+                                     Z_arr(2*L, vector<bool>(L)),
+                                     coeff(2*L),
                                      Z_moves(4,  vector<PauliStr>(4,  PauliStr(1))),
                                      XX_moves(4, vector<PauliStr>(16, PauliStr(1))) {
 
@@ -58,7 +68,51 @@ StabilizerSet::StabilizerSet(void) : X_arr(L, vector<bool>(L)),
 }
 
 
-void StabilizerSet::set_string(int index, string chars, int left_pad=0) {
+int StabilizerSet::pauliprod(bool x1, bool z1, bool x2, bool z2) {
+    /* Power to which "i" is raised when multiplying Paulis */
+    if (x1 == 0 and z1 == 0) return 0;
+    else if (x1 == 1 and z1 == 1) return z2 - x2;
+    else if (x1 == 1 and z1 == 0) return z2*(2*x2-1);
+    else return x2*(1-2*z2);
+}
+
+
+int StabilizerSet::newsign(int h, int j) {
+    /* Find new sign when multiplying rows:
+     *      R_h R_j --> R_h
+     */
+
+    int m = 0;
+
+    for (int k = 0; k < L; k++) {
+        m += pauliprod(X_arr[j][k], Z_arr[j][k], X_arr[h][k], Z_arr[h][k]);
+    }
+
+    m += 2*coeff[h] + 2*coeff[j];
+    m %= 4;
+
+    return m/2; // new sign of row h
+}
+
+
+int StabilizerSet::newsign(vector<bool> X, vector<bool> Z, bool c, int j) {
+    /* Find new sign when multiplying rows:
+     *      R_h R_j --> R_h
+     */
+
+    int m = 0;
+
+    for (int k = 0; k < L; k++) {
+        m += pauliprod(X_arr[j][k], Z_arr[j][k], X[k], Z[k]);
+    }
+
+    m += 2*c + 2*coeff[j];
+    m %= 4;
+
+    return m/2; // new sign of row h
+}
+
+void StabilizerSet::set_string(int index, string chars, int left_pad=0, bool c=0) {
 
     assert(left_pad+chars.length() <= L);
 
@@ -83,52 +137,36 @@ void StabilizerSet::set_string(int index, string chars, int left_pad=0) {
             Z_arr[index][i] = false;
         }
     }
+
+    coeff[index] = c; 
+}
+
+
+void StabilizerSet::update_generators_signs(vector<int> anti) {
+
+    int n_first = anti[0];
+
+    for (int anti_index = 1; anti_index < anti.size(); anti_index++) {
+
+        int n_curr  = anti[anti_index];
+
+        // based on present configuration of X's and Z's
+        coeff[n_curr] = newsign(n_first, n_curr);
+    }
 }
 
 
 void StabilizerSet::update_generators(vector<int> anti) {
 
-    if (TRACK_SIGNS) {
-        vector<bool> coeff_copy(coeff);
-
-        for (int anti_index = 1; anti_index < anti.size(); anti_index++) {
-
-            bool sign, complex;
-            int flip = 0;
-
-            int n_prev = anti[anti_index-1];
-            int n_curr = anti[anti_index];
-
-            for (int i = 0; i < L; i++) {
-                sign = Z_arr[n_prev][i] && X_arr[n_curr][i];
-                complex = X_arr[n_prev][i] && Z_arr[n_prev][i] &&
-                          X_arr[n_curr][i] && Z_arr[n_curr][i];
-                flip += int(sign) + int(complex);
-            }
-
-            flip %= 2;
-
-            if (flip) {
-                coeff[n_curr] = (!coeff_copy[n_prev]) ^ coeff_copy[n_curr];
-            }
-            else {
-                coeff[n_curr] = (coeff_copy[n_prev]) ^ coeff_copy[n_curr];
-            }
-
-        }
-    }
-
-    auto X_copy(X_arr);
-    auto Z_copy(Z_arr);
+    int n_first = anti[0];
 
     for (int anti_index = 1; anti_index < anti.size(); anti_index++) {
 
-        int n_prev = anti[anti_index-1];
-        int n_curr = anti[anti_index];
+        int n_curr  = anti[anti_index];
 
         for (int i = 0; i < L; i++) {
-            X_arr[n_curr][i] = X_copy[n_curr][i] ^ X_copy[n_prev][i];
-            Z_arr[n_curr][i] = Z_copy[n_curr][i] ^ Z_copy[n_prev][i];
+            X_arr[n_curr][i] = X_arr[n_curr][i] ^ X_arr[n_first][i];
+            Z_arr[n_curr][i] = Z_arr[n_curr][i] ^ Z_arr[n_first][i];
         }
     }
 }
@@ -218,27 +256,152 @@ int StabilizerSet::halfchain_entanglement(void) {
         SvN -= (int)isAllZero;
     }
 
-    assert(SvN > 0);
+    //assert(SvN >= 0);
     return SvN;
+}
+
+
+int StabilizerSet::magnetization_X (void) {
+    
+    int mag = 0;
+
+    for (int i = 0; i < L; i++) {
+
+        bool allzero = true;
+
+        for (int n = 0; n < L; n++) {
+            if (Z_arr[n][i]) allzero = false;
+        }
+
+        //cout << "allzero? " << allzero << endl;
+
+        if (allzero) {
+            
+            vector<int> anti_des;
+            for (int n = L; n < 2*L; n++) {
+                if (Z_arr[n][i]) anti_des.push_back(n);
+            }
+
+            vector<bool> X_scratch(L);
+            vector<bool> Z_scratch(L);
+            bool coeff_scratch = 0;
+
+            for (auto const& row : anti_des) {
+                coeff_scratch = newsign(X_scratch, Z_scratch, coeff_scratch, row);
+
+                for (int k = 0; k < L; k++) {
+                    X_scratch[k] = X_scratch[k] ^ X_arr.at(row-L)[k];
+                    Z_scratch[k] = Z_scratch[k] ^ Z_arr.at(row-L)[k];
+                }
+            }
+
+            //cout << "coeff scratch " << coeff_scratch << endl;
+            mag += 1-2*((int)coeff_scratch);
+        }
+    }
+
+    return mag;
+
+}
+
+
+int StabilizerSet::unsigned_magnetization_X (void) {
+    
+    int mag = 0;
+
+    for (int i = 0; i < L; i++) {
+
+        bool allzero = true;
+
+        for (int n = 0; n < L; n++) {
+            if (Z_arr[n][i]) allzero = false;
+        }
+
+        if (allzero) {
+            mag += 1;
+        }
+    }
+
+    return mag;
+
+}
+
+
+int StabilizerSet::spinglass_orderparam (void) {
+    
+    int twosite = 0;
+    vector<bool> onesite(L, false);
+
+    for (int i = 0; i < L; i++) {
+
+        bool allzero = true;
+
+        for (int n = 0; n < L; n++) {
+            if (Z_arr[n][i]) allzero = false;
+        }
+
+        if (allzero) {
+            onesite[i] = true;
+        }
+    }
+
+    int orderparam = 0;
+
+    for (int i = 0; i < L; i++) {
+        for (int j = 0; j < L; j++) {
+
+            bool allzero = true;
+
+            for (int n = 0; n < L; n++) {
+                if (Z_arr[n][i] ^ Z_arr[n][j]) allzero = false;
+            }
+
+            orderparam -= (int)(onesite[i]*onesite[j]);
+
+            if (allzero) {
+                orderparam += 1;
+            }
+        }
+    }
+
+    return orderparam;
+
 }
 
 
 void StabilizerSet::measure_Z(int site) {
 
+    // cout # stabilizers + #destabilizers that anticommute
     // look for existence of X - store location of trues 
     vector<int> anti;
-
-    for (int n = 0; n < L; n++) {
-        if (X_arr[n][site] == true) {
-            anti.push_back(n);
-        }
+    for (int n = 0; n < (1+TRACK_SIGNS)*L; n++) {
+        if (X_arr[n][site]) anti.push_back(n);
     }
 
-    if (anti.size() > 0) {
+    // count # stabilizers that anticommute
+    int anti_stab = 0;
+    for (auto const& anti_pos : anti) {
+        if (anti_pos < L) anti_stab += 1;
+    }
+
+
+    if (anti_stab > 0) {
+
+
         if (anti.size() > 1) {
+            if (TRACK_SIGNS) update_generators_signs(anti);
             update_generators(anti);
         }
 
+        // set corresponding destabilizer to first anticommuting stabilizer
+        for (int i = 0; i < L; i++) {
+            X_arr.at(anti[0]+L)[i] = X_arr[anti[0]][i];
+            Z_arr.at(anti[0]+L)[i] = Z_arr[anti[0]][i];
+        }
+
+        coeff.at(anti[0]+L) = coeff[anti[0]];
+
+        // set first anticommuting stabilizer to plus/minus z (random sign)
         for (int i = 0; i < L; i++) {
             X_arr[anti[0]][i] = false;
             Z_arr[anti[0]][i] = false;
@@ -252,7 +415,9 @@ void StabilizerSet::measure_Z(int site) {
         else {
             coeff[anti[0]] = 1;
         }
+
     }
+
 }
 
 
@@ -261,17 +426,35 @@ void StabilizerSet::measure_XX(int site1, int site2) {
     // look for existence of X - store location of trues 
     vector<int> anti;
 
-    for (int n = 0; n < L; n++) {
-        if (Z_arr[n][site1] ^ Z_arr[n][site2]) {
-            anti.push_back(n);
-        }
+    for (int n = 0; n < (1+TRACK_SIGNS)*L; n++) {
+        if (Z_arr[n][site1] ^ Z_arr[n][site2]) anti.push_back(n);
     }
 
-    if (anti.size() > 0) {
+    // count # stabilizers that anticommute
+    int anti_stab = 0;
+    for (auto const& anti_pos : anti) {
+        if (anti_pos < L) anti_stab += 1;
+    }
+
+    if (anti_stab > 0) {
+
+
+
         if (anti.size() > 1) {
+            if (TRACK_SIGNS) update_generators_signs(anti);
             update_generators(anti);
         }
 
+        // set corresponding destabilizer to first anticommuting stabilizer
+        for (int i = 0; i < L; i++) {
+            X_arr.at(anti[0]+L)[i] = X_arr[anti[0]][i];
+            Z_arr.at(anti[0]+L)[i] = Z_arr[anti[0]][i];
+        }
+
+        coeff.at(anti[0]+L) = coeff[anti[0]];
+
+
+        // set first anticommuting stabilizer to XX
         for (int i = 0; i < L; i++) {
             X_arr[anti[0]][i] = false;
             Z_arr[anti[0]][i] = false;
@@ -290,13 +473,11 @@ void StabilizerSet::measure_XX(int site1, int site2) {
 }
 
 
-
-
 void StabilizerSet::apply_Z_gate(int site, int set_gate=-1) {
     
     int gate = (set_gate < 0) ? (int)(dis(gen)*4) : set_gate;
 
-    for (int n = 0; n < L; n++) {
+    for (int n = 0; n < (1+TRACK_SIGNS)*L; n++) {
         bool x = X_arr[n][site];
         bool z = Z_arr[n][site];
 
@@ -306,6 +487,7 @@ void StabilizerSet::apply_Z_gate(int site, int set_gate=-1) {
         Z_arr[n][site] = PStr.Z_arr[0];
 
         coeff[n] = coeff[n] ^ PStr.coeff;
+
     }
 }
 
@@ -316,9 +498,7 @@ void StabilizerSet::apply_Z_layer(void) {
     generate(gates.begin(), gates.end(), []() { return gate_dis(gen); });
 
     for (int i = 0; i < L; i++) {
-        for (int n = 0; n < L; n++) {
-            //bool x = X_arr[n][i];
-            //bool z = Z_arr[n][i];
+        for (int n = 0; n < (1+TRACK_SIGNS)*L; n++) {
 
             auto PStr(Z_moves[gates[i]][ONESITE(X_arr[n][i], Z_arr[n][i])]);
 
@@ -326,6 +506,7 @@ void StabilizerSet::apply_Z_layer(void) {
             Z_arr[n][i] = PStr.Z_arr[0];
 
             coeff[n] = coeff[n] ^ PStr.coeff;
+
         }
     }
 }
@@ -335,7 +516,7 @@ void StabilizerSet::apply_XX_gate(int site1, int site2, int set_gate=-1) {
 
     int gate = (set_gate < 0) ? (int)(dis(gen)*4) : set_gate;
 
-    for (int n = 0; n < L; n++) {
+    for (int n = 0; n < (1+TRACK_SIGNS)*L; n++) {
         bool x1 = X_arr[n][site1];
         bool z1 = Z_arr[n][site1];
         bool x2 = X_arr[n][site2];
@@ -347,6 +528,7 @@ void StabilizerSet::apply_XX_gate(int site1, int site2, int set_gate=-1) {
         Z_arr[n][site2] = XX_moves[gate][TWOSITE(x1, z1, x2, z2)].Z_arr[1];
 
         coeff[n] = coeff[n] ^ XX_moves[gate][TWOSITE(x1, z1, x2, z2)].coeff;
+
     }
 }
 
@@ -424,7 +606,7 @@ void StabilizerSet::generate_XX_gates(void) {
 
 void StabilizerSet::print_generators(void) {
 
-    for (int n = 0; n < L; n++) {
+    for (int n = 0; n < 2*L; n++) {
         cout << coeff[n] << "   ";
 
         for (int i = 0; i < L; i++) {

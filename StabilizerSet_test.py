@@ -156,10 +156,12 @@ end = time.time()
 
 print("elapsed time = {}".format(end-start))
 print()
-L=8
+
+
+L = 8
 # stabilizers
 Gs = []
-g_strings = ["zeeeeeee", "zyeyxeex", "eezeeeee", "zxeeeeey", "eeezxeey", "eeeeezee", "eeeeeeze", "eeeyzeey"]
+g_strings = ["xxeeeeee", "eexxeeee", "xexeeeee", "xeeexeee", "eeeexxee", "eeeeeexx", "xeeeeeex", "zzzzzzzz"]
 
 for thong in g_strings:
     newPauli = NQO.PauliStr.from_char_string(thong)
@@ -169,12 +171,12 @@ for thong in g_strings:
 densitymatrix = StSet.dmat_array(L, Gs)
 print("new density matrix has trace = {}".format(np.trace(densitymatrix)))
 
-S = EntEnt(densitymatrix,8,4)
+S = EntEnt(densitymatrix, L, L//2)
 print("vN entanglement entropy is {} and log2 is {}".format(S,np.log(2.0)))
 
 
-S0 = Renyi0(densitymatrix,8,4)
+S0 = Renyi0(densitymatrix, L, L//2)
 print("Renyi 0 is {}".format(S0))
 
-S2 = Renyi2(densitymatrix,8,4)
+S2 = Renyi2(densitymatrix, L, L//2)
 print("Renyi 2 is {}".format(S2))
